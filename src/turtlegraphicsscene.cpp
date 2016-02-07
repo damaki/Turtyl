@@ -26,7 +26,8 @@ static const int DEFAULT_SIZE = 2048;
 TurtleGraphicsScene::TurtleGraphicsScene() :
     m_scene(),
     m_pixmap(DEFAULT_SIZE, DEFAULT_SIZE),
-    m_painter(&m_pixmap)
+    m_painter(&m_pixmap),
+    m_view(NULL)
 {
     clear();
     updateScene();
@@ -46,6 +47,8 @@ void TurtleGraphicsScene::setCanvasSize(int newSize)
     if (newSize != oldSize)
     {
         QPixmap newpixmap(newSize, newSize);
+        newpixmap.fill(Qt::transparent);
+
         QPainter painter(&newpixmap);
         int offset;
 
@@ -66,6 +69,20 @@ void TurtleGraphicsScene::setCanvasSize(int newSize)
         m_painter.end();
         m_pixmap = newpixmap;
         m_painter.begin(&m_pixmap);
+    }
+}
+
+QGraphicsView* TurtleGraphicsScene::view() const
+{
+    return m_view;
+}
+
+void TurtleGraphicsScene::setView(QGraphicsView* const view)
+{
+    m_view = view;
+    if (view != NULL)
+    {
+        view->setScene(&m_scene);
     }
 }
 
@@ -93,7 +110,10 @@ void TurtleGraphicsScene::clear()
 {
     QMutexLocker lock(&m_mutex);
 
-    m_pixmap.fill(Qt::black);
+    // Can't fill a pixmap while a painter is active on the target.
+    m_painter.end();
+    m_pixmap.fill(Qt::transparent);
+    m_painter.begin(&m_pixmap);
 }
 
 void TurtleGraphicsScene::drawLine(const QLineF& line, const QPen& pen)

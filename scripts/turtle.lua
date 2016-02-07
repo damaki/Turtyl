@@ -84,6 +84,27 @@ darkGray    = {r=128, g=128, b=128}
 lightGray   = {r=192, g=192, b=192}
 
 -------------------------------------------------------------------------------
+-- Helpers
+local function parsecolor(r,g,b, funcname)
+    -- If only the 'r' parameter is given (the others are nil) then
+    -- 'r' is treated as a color table (containing RGB values).
+    if r ~= nil and g == nil and b == nil then
+        if r["r"] ~= nil and
+           r["g"] ~= nil and
+           r["b"] ~= nil then
+            return r.r, r.g, r.b
+        else
+            error("The color passed to " .. funcname .. "() must have 'r', 'g', and 'b' values")
+        end
+
+    else
+       assert(g ~= nil and b ~= nil, "expected 3 number arguments to " .. funcname .. "()")
+
+       return r,g,b
+    end
+end
+
+-------------------------------------------------------------------------------
 -- Standard Logo turtle commands
 
 function fd(distance)
@@ -121,22 +142,15 @@ end
 function color(r,g,b)
     assert(r ~= nil, "missing argument to color()")
 
-    -- If only the 'r' parameter is given (the others are nil) then
-    -- 'r' is treated as a color table (containing RGB values).
-    if r ~= nil and g == nil and b == nil then
-        if r["r"] ~= nil and
-           r["g"] ~= nil and
-           r["b"] ~= nil then
-            turtle.pencolor = r
-        else
-            error("The color passed to color() must have 'r', 'g', and 'b' values")
-        end
+    r,g,b = parsecolor(r,g,b,"color")
+    turtle.pencolor = {r=r, g=g, b=b}
+end
 
-    else
-       assert(g ~= nil and b ~= nil, "expected 3 number arguments to color()")
+function bgcolor(r,g,b)
+    assert(r ~= nil, "missing argument to bgcolor()")
 
-        turtle.pencolor = {r=r, g=g, b=b}
-    end
+    r,g,b = parsecolor(r,g,b,"bgcolor")
+    set_background_color(r,g,b)
 end
 
 function home()

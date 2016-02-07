@@ -18,9 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***********************************************************************/
 #include "basiccommands.h"
+#include <cassert>
 
 static const int DRAW_LINE_ARGS_COUNT = 8;
 static const int DRAW_ARC_ARGS_COUNT = 9;
+static const int SET_BACKGROUND_COLOR_ARGS_COUNT = 3;
 
 static const char* LUA_SCENE_NAME = "_tartargua_scene";
 
@@ -70,6 +72,7 @@ void setupCommands(lua_State* state, TurtleGraphicsScene* scene)
     lua_register(state, "draw_line", &drawLine);
     lua_register(state, "draw_arc",  &drawArc);
     lua_register(state, "clear", &clear);
+    lua_register(state, "set_background_color", &setBackgroundColor);
 }
 
 /**
@@ -175,7 +178,7 @@ int drawArc(lua_State* state)
         if (!isNumber)
         {
             lua_pushstring(state,
-                           QString("argument %1 to draw_line must be a number")
+                           QString("argument %1 to draw_arc must be a number")
                             .arg(i).toStdString().c_str());
             lua_error(state);
         }
@@ -214,5 +217,47 @@ int drawArc(lua_State* state)
 int clear(lua_State* state)
 {
     getGraphicsScene(state).clear();
+    return 0;
+}
+
+int setBackgroundColor(lua_State* state)
+{
+    lua_Number arguments[SET_BACKGROUND_COLOR_ARGS_COUNT];
+    int isNumber = 0;
+
+    // Check number of arguments
+    if (lua_gettop(state) < SET_BACKGROUND_COLOR_ARGS_COUNT)
+    {
+        lua_pushstring(state, "too few arguments to bgcolor()");
+        lua_error(state);
+    }
+
+    // Read each argument from the Lua stack
+    for (int i = 1; i <= SET_BACKGROUND_COLOR_ARGS_COUNT; i++)
+    {
+        arguments[i-1] = lua_tonumberx(state, i, &isNumber);
+        if (!isNumber)
+        {
+            lua_pushstring(state,
+                           QString("argument %1 to bgcolor() must be a number")
+                            .arg(i).toStdString().c_str());
+            lua_error(state);
+        }
+    }
+
+    arguments[0] = std::min(255.0, std::max(0.0, arguments[0]));
+    arguments[1] = std::min(255.0, std::max(0.0, arguments[1]));
+    arguments[2] = std::min(255.0, std::max(0.0, arguments[2]));
+    QColor color(static_cast<int>(arguments[0]),
+                 static_cast<int>(arguments[1]),
+                 static_cast<int>(arguments[2]));
+
+    QGraphicsView* view = getGraphicsScene(state).view();
+    assert(view != NULL);
+    if (view != NULL)
+    {
+        view->setBackgroundBrush(QBrush(color));
+    }
+
     return 0;
 }

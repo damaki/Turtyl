@@ -39,8 +39,11 @@ public:
     QGraphicsScene& scene();
     const QGraphicsScene& scene() const;
 
+    QGraphicsView* view() const;
+    void setView(QGraphicsView* view);
+
     int canvasSize() const;
-    void setCanvasSize(int size);
+    void setCanvasSize(int newSize);
 
     bool antialiasingEnabled() const;
     void setAntialiasing(bool on = true);
@@ -63,6 +66,8 @@ private:
     QPainter m_painter;
 
     QPen m_pen;
+
+    QGraphicsView* m_view;
 };
 
 #endif // TURTLEGRAPHICSVIEW_H
