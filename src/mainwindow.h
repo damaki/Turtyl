@@ -20,10 +20,13 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QCheckBox>
 #include <QMainWindow>
 #include <QGraphicsView>
 #include <QPlainTextEdit>
+#include <QSpinBox>
 #include "commandrunner.h"
+#include "preferencesdialog.h"
 #include "turtlegraphicsscene.h"
 
 namespace Ui {
@@ -43,12 +46,15 @@ private slots:
     void handleError(const QString& message);
 
 private:
+
     Ui::MainWindow *ui;
 
     QPlainTextEdit* m_cmdEdit;
     QGraphicsView* m_view;
     TurtleGraphicsScene m_scene;
     CommandRunner m_cmds;
+
+    PreferencesDialog* m_prefsDialog;
 };
 
 #endif // MAINWINDOW_H

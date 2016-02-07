@@ -16,14 +16,17 @@ SOURCES += src/main.cpp\
     src/mainwindow.cpp \
     src/commandrunner.cpp \
     src/basiccommands.cpp \
-    src/turtlegraphicsscene.cpp
+    src/turtlegraphicsscene.cpp \
+    src/preferencesdialog.cpp
 
 HEADERS  += src/mainwindow.h \
     src/commandrunner.h \
     src/basiccommands.h \
-    src/turtlegraphicsscene.h
+    src/turtlegraphicsscene.h \
+    src/preferencesdialog.h
 
-FORMS    += forms/mainwindow.ui
+FORMS    += forms/mainwindow.ui \
+    forms/preferencesdialog.ui
 
 # Lua sources
 INCLUDEPATH += src/lua

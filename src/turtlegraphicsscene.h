@@ -39,6 +39,12 @@ public:
     QGraphicsScene& scene();
     const QGraphicsScene& scene() const;
 
+    int canvasSize() const;
+    void setCanvasSize(int size);
+
+    bool antialiasingEnabled() const;
+    void setAntialiasing(bool on = true);
+
     void clear();
 
     void drawLine(const QLineF& line, const QPen& pen);
@@ -54,6 +60,7 @@ private:
     QMutex m_mutex;
     QGraphicsScene m_scene;
     QPixmap m_pixmap;
+    QPainter m_painter;
 
     QPen m_pen;
 };

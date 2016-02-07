@@ -25,12 +25,58 @@ static const int DEFAULT_SIZE = 2048;
 
 TurtleGraphicsScene::TurtleGraphicsScene() :
     m_scene(),
-    m_pixmap(DEFAULT_SIZE, DEFAULT_SIZE)
-
+    m_pixmap(DEFAULT_SIZE, DEFAULT_SIZE),
+    m_painter(&m_pixmap)
 {
     clear();
 }
 
+int TurtleGraphicsScene::canvasSize() const
+{
+    return m_pixmap.width();
+}
+
+void TurtleGraphicsScene::setCanvasSize(int newSize)
+{
+    QMutexLocker lock(&m_mutex);
+
+    const int oldSize = canvasSize();
+
+    if (newSize != oldSize)
+    {
+        QPixmap newpixmap(newSize, newSize);
+        QPainter painter(&newpixmap);
+        int offset;
+
+        if (newSize > oldSize)
+        {
+            offset = (newSize - oldSize) / 2;
+        }
+        else
+        {
+            offset = -((oldSize - newSize) / 2);
+        }
+
+        painter.drawPixmap(QPoint(offset, offset),
+                           m_pixmap,
+                           m_pixmap.rect());
+
+        // Can't assign pixmaps while a painter is active on the target.
+        m_painter.end();
+        m_pixmap = newpixmap;
+        m_painter.begin(&m_pixmap);
+    }
+}
+
+bool TurtleGraphicsScene::antialiasingEnabled() const
+{
+    return m_painter.testRenderHint(QPainter::Antialiasing);
+}
+
+void TurtleGraphicsScene::setAntialiasing(const bool on)
+{
+    m_painter.setRenderHint(QPainter::Antialiasing, on);
+}
 
 QGraphicsScene& TurtleGraphicsScene::scene()
 {
@@ -53,14 +99,12 @@ void TurtleGraphicsScene::drawLine(const QLineF& line, const QPen& pen)
 {
     QMutexLocker lock(&m_mutex);
 
-    QPainter painter(&m_pixmap);
-
-    painter.setPen(pen);
+    m_painter.setPen(pen);
 
     // Translate the origin from the user's perspective (center of the drawing area)
     // to QPixmap's origin (top-left of the pixmap).
-    painter.drawLine(line.translated(static_cast<qreal>(m_pixmap.width())  / 2.0,
-                                     static_cast<qreal>(m_pixmap.height()) / 2.0));
+    m_painter.drawLine(line.translated(static_cast<qreal>(m_pixmap.width())  / 2.0,
+                                       static_cast<qreal>(m_pixmap.height()) / 2.0));
 }
 
 void TurtleGraphicsScene::drawArc(const QPointF& startPos,
@@ -71,9 +115,7 @@ void TurtleGraphicsScene::drawArc(const QPointF& startPos,
 {
     QMutexLocker lock(&m_mutex);
 
-    QPainter painter(&m_pixmap);
-
-    painter.setPen(pen);
+    m_painter.setPen(pen);
 
     QRectF boundingBox(startPos.x() - radius,
                        startPos.y() - radius,
@@ -96,7 +138,7 @@ void TurtleGraphicsScene::drawArc(const QPointF& startPos,
     const int startAngleInt = static_cast<int>(startAngle * 16.0);
     const int angleInt      = static_cast<int>(angle * 16.0);
 
-    painter.drawArc(boundingBox, startAngleInt, angleInt);
+    m_painter.drawArc(boundingBox, startAngleInt, angleInt);
 }
 
 void TurtleGraphicsScene::updateScene()

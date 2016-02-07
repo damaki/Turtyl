@@ -29,7 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_cmdEdit(NULL),
     m_view(NULL),
     m_scene(),
-    m_cmds(&m_scene)
+    m_cmds(&m_scene),
+    m_prefsDialog(new PreferencesDialog(&m_scene))
 {
     ui->setupUi(this);
 
@@ -52,6 +53,13 @@ MainWindow::MainWindow(QWidget *parent) :
     if (runButton != NULL)
     {
         connect(runButton, SIGNAL(clicked()), this, SLOT(runCommand()));
+    }
+
+    QAction* prefsAction = findChild<QAction*>("action_Preferences");
+    if (NULL != prefsAction)
+    {
+        connect(prefsAction, SIGNAL(triggered()), m_prefsDialog, SLOT(show()));
+        connect(prefsAction, SIGNAL(triggered()), m_prefsDialog, SLOT(loadPreferences()));
     }
 
     connect(&m_cmds, SIGNAL(commandError(QString)), this, SLOT(handleError(QString)));
@@ -79,3 +87,4 @@ void MainWindow::handleError(const QString& message)
     //TODO: Display error messages in the GUI
     std::cerr << message.toStdString() << std::endl;
 }
+
