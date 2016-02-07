@@ -27,6 +27,7 @@ static const int SET_BACKGROUND_COLOR_ARGS_COUNT = 3;
 
 static const char* LUA_PARENT_NAME = "_tartargua_parent";
 
+
 /**
  * @brief Get the @c CommandRunner associated with a Lua VM.
  *
