@@ -18,37 +18,57 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***********************************************************************/
 #include "basiccommands.h"
+#include "commandrunner.h"
 #include <cassert>
 
 static const int DRAW_LINE_ARGS_COUNT = 8;
 static const int DRAW_ARC_ARGS_COUNT = 9;
 static const int SET_BACKGROUND_COLOR_ARGS_COUNT = 3;
 
-static const char* LUA_SCENE_NAME = "_tartargua_scene";
+static const char* LUA_PARENT_NAME = "_tartargua_parent";
 
 /**
- * @brief Get the @c TurtleGraphicsScene associated with a Lua VM.
+ * @brief Get the @c CommandRunner associated with a Lua VM.
  *
- * If the script does not have a TurtleGraphicsScene associated with it then
+ * If the script does not have a CommandRunner associated with it then
  * @c lua_error is called and this function does not return.
  *
  * @warning This function must only be called from C functions called from Lua.
  * This is because this function calls @c lua_error if an error occurs.
  *
  * @param state The lua state.
- * @return The @c TurtleGraphicsScene read from the lua state.
+ * @return The @c CommandRunner read from the lua state.
  */
-static TurtleGraphicsScene& getGraphicsScene(lua_State* state)
+static CommandRunner& getParent(lua_State* state)
 {
-    lua_getglobal(state, LUA_SCENE_NAME);
-    void* rawscene = lua_touserdata(state, -1);
-    if (rawscene == NULL)
+    lua_getglobal(state, LUA_PARENT_NAME);
+    void* rawparent = lua_touserdata(state, -1);
+    if (rawparent == NULL)
     {
-        lua_pushstring(state, "missing scene");
+        lua_pushstring(state, "missing parent");
         lua_error(state);
     }
 
-    return *reinterpret_cast<TurtleGraphicsScene*>(rawscene);
+    return *reinterpret_cast<CommandRunner*>(rawparent);
+}
+
+/**
+ * @brief Lua debug hook.
+ *
+ * This hook is used to pause/resume, and halt the current script.
+ */
+static void debugHook(lua_State* state, lua_Debug* )
+{
+    CommandRunner& parent = getParent(state);
+
+    parent.checkPause();
+
+    if (parent.isHaltRequested())
+    {
+        // Stop the script
+        lua_pushstring(state, "halted");
+        lua_error(state);
+    }
 }
 
 /**
@@ -61,13 +81,15 @@ static TurtleGraphicsScene& getGraphicsScene(lua_State* state)
  * @param[in,out] state The commands are registered to this lua state.
  * @param[in] scene The scene to associate with the lua state.
  */
-void setupCommands(lua_State* state, TurtleGraphicsScene* scene)
+void setupCommands(lua_State* state, CommandRunner* parent)
 {
-    if (NULL != scene)
+    if (NULL != parent)
     {
-        lua_pushlightuserdata(state, scene);
-        lua_setglobal(state, LUA_SCENE_NAME);
+        lua_pushlightuserdata(state, parent);
+        lua_setglobal(state, LUA_PARENT_NAME);
     }
+
+    lua_sethook(state, &debugHook, LUA_MASKCOUNT, 1000);
 
     lua_register(state, "draw_line", &drawLine);
     lua_register(state, "draw_arc",  &drawArc);
@@ -135,7 +157,7 @@ int drawLine(lua_State* state)
 
     QPen pen(QBrush(color), arguments[7]);
 
-    getGraphicsScene(state).drawLine(line, pen);
+    getParent(state).scene()->drawLine(line, pen);
 
     return 0;
 }
@@ -201,7 +223,7 @@ int drawArc(lua_State* state)
 
     QPen pen(QBrush(color), arguments[8]);
 
-    getGraphicsScene(state).drawArc(arcCenterPos, startAngle, angle, radius, pen);
+    getParent(state).scene()->drawArc(arcCenterPos, startAngle, angle, radius, pen);
 
     return 0;
 }
@@ -216,7 +238,7 @@ int drawArc(lua_State* state)
  */
 int clear(lua_State* state)
 {
-    getGraphicsScene(state).clear();
+    getParent(state).scene()->clear();
     return 0;
 }
 
@@ -252,7 +274,7 @@ int setBackgroundColor(lua_State* state)
                  static_cast<int>(arguments[1]),
                  static_cast<int>(arguments[2]));
 
-    QGraphicsView* view = getGraphicsScene(state).view();
+    QGraphicsView* view = getParent(state).view();
     assert(view != NULL);
     if (view != NULL)
     {

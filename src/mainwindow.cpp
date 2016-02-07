@@ -94,6 +94,7 @@ MainWindow::MainWindow(QWidget *parent) :
             this,    SLOT(commandFinished()),
             Qt::QueuedConnection);
 
+    m_cmds.setView(m_view);
     m_cmds.start();
 
     //TODO: Make startup scripts configurable.
@@ -177,6 +178,8 @@ void MainWindow::pauseCommand()
     {
         m_resumeButton->setEnabled(true);
     }
+
+    m_cmds.requestCommandPause();
 }
 
 void MainWindow::resumeCommand()
@@ -189,6 +192,8 @@ void MainWindow::resumeCommand()
     {
         m_resumeButton->setEnabled(false);
     }
+
+    m_cmds.requestCommandResume();
 }
 
 void MainWindow::haltCommand()
@@ -209,4 +214,6 @@ void MainWindow::haltCommand()
     {
         m_resumeButton->setEnabled(false);
     }
+
+    m_cmds.requestCommandHalt();
 }

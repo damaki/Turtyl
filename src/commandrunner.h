@@ -41,11 +41,23 @@ class CommandRunner : public QThread
 public:
     CommandRunner(TurtleGraphicsScene* scene);
 
+    TurtleGraphicsScene* scene() const;
+
+    QGraphicsView* view() const;
+    void setView(QGraphicsView* view);
+
     void requestThreadStop();
+
+    void requestCommandPause();
+    void requestCommandResume();
+    void requestCommandHalt();
 
     void runCommand(const QString& command);
 
     void runScriptFile(const QString& filename);
+
+    void checkPause();
+    bool isHaltRequested() const;
 
 signals:
     void commandFinished();
@@ -57,12 +69,20 @@ protected:
 private:
     lua_State* m_state;
     TurtleGraphicsScene* m_scene;
+    QGraphicsView* m_view;
 
-    QMutex m_luaMutex; // locked while a script is running
+    mutable QMutex m_luaMutex; // locked while a script is running
 
     QSemaphore m_scriptDataSema;
-    QMutex m_scriptDataMutex;
+    mutable QMutex m_scriptDataMutex;
     QQueue<QString> m_scriptData;
+
+    QWaitCondition m_pauseCond;
+    mutable QMutex m_pauseMutex;
+    bool m_pause;
+
+    mutable QMutex m_haltMutex;
+    bool m_halt;
 };
 
 #endif // COMMANDRUNNER_H

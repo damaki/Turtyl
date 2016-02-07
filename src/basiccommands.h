@@ -23,7 +23,9 @@
 #include "turtlegraphicsscene.h"
 #include "lua.hpp"
 
-void setupCommands(lua_State* state, TurtleGraphicsScene* scene);
+class CommandRunner;
+
+void setupCommands(lua_State* state, CommandRunner* parent);
 
 int drawLine(lua_State* state);
 int drawArc(lua_State* state);

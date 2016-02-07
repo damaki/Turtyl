@@ -20,12 +20,25 @@
 #include "commandrunner.h"
 #include "basiccommands.h"
 #include <QMutexLocker>
+#include <cassert>
 
 CommandRunner::CommandRunner(TurtleGraphicsScene* const scene) :
     m_state(luaL_newstate()),
-    m_scene(scene)
+    m_scene(scene),
+    m_view(NULL),
+    m_scriptDataSema(),
+    m_scriptDataMutex(),
+    m_scriptData(),
+    m_pauseCond(),
+    m_pauseMutex(),
+    m_pause(false),
+    m_haltMutex(),
+    m_halt(false)
 {
-    // Load all libraries except io and os.
+    assert(NULL != m_state);
+    assert(NULL != scene);
+
+    // Load all libraries except io, os, and debug.
     // These libraries are omitted for security.
     luaL_requiref(m_state, "_G",        &luaopen_base,      1);
     luaL_requiref(m_state, "coroutine", &luaopen_coroutine, 1);
@@ -37,13 +50,71 @@ CommandRunner::CommandRunner(TurtleGraphicsScene* const scene) :
     lua_pop(m_state, 7);
 
 
-    setupCommands(m_state, scene);
+    setupCommands(m_state, this);
 }
 
+TurtleGraphicsScene* CommandRunner::scene() const
+{
+    return m_scene;
+}
+
+QGraphicsView* CommandRunner::view() const
+{
+    return m_view;
+}
+
+void CommandRunner::setView(QGraphicsView* const view)
+{
+    m_view = view;
+}
+
+/**
+ * @brief Send a request to stop the thread.
+ *
+ * If any commands are currently being executed by the thread then the current command
+ * is halted.
+ */
 void CommandRunner::requestThreadStop()
 {
     requestInterruption();
-    m_scriptDataSema.release();
+    requestCommandHalt();
+    m_scriptDataSema.release(); // wake up the thread (if it's sleeping)
+}
+
+/**
+ * @brief Send a request to pause the execution of a currently running command.
+ */
+void CommandRunner::requestCommandPause()
+{
+    QMutexLocker lock(&m_pauseMutex);
+    m_pause = true;
+}
+
+/**
+ * @brief Send a request to resume the execution of a previously paused command.
+ */
+void CommandRunner::requestCommandResume()
+{
+    QMutexLocker lock(&m_pauseMutex);
+    if (m_pause)
+    {
+        m_pause = false;
+        m_pauseCond.wakeAll();
+    }
+}
+
+/**
+ * @brief Send a request to halt/abort the execution of the current command(s).
+ */
+void CommandRunner::requestCommandHalt()
+{
+    {
+        QMutexLocker lock(&m_haltMutex);
+        m_halt = true;
+    }
+
+    // The command might currently be paused.
+    requestCommandResume();
 }
 
 /**
@@ -56,9 +127,20 @@ void CommandRunner::requestThreadStop()
 void CommandRunner::runCommand(const QString& command)
 {
     {
+        QMutexLocker lock(&m_pauseMutex);
+        m_pause = false;
+    }
+
+    {
+        QMutexLocker lock(&m_haltMutex);
+        m_halt = false;
+    }
+
+    {
         QMutexLocker lock(&m_scriptDataMutex);
         m_scriptData.push_back(command);
     }
+
     m_scriptDataSema.release();
 }
 
@@ -91,6 +173,36 @@ void CommandRunner::runScriptFile(const QString& filename)
             emit commandError(QString(errmsg));
         }
     }
+}
+
+/**
+ * @brief Waits until the script is resumed.
+ *
+ * If @c requestCommandPause() is called then this method will block until
+ * @c requestCommandResume() is called by another thread.
+ *
+ * @see requestCommandPause()
+ * @see requestCommandResume()
+ */
+void CommandRunner::checkPause()
+{
+    QMutexLocker lock(&m_pauseMutex);
+    while (m_pause)
+    {
+        m_pauseCond.wait(&m_pauseMutex);
+    }
+}
+
+/**
+ * @brief Check for a request to halt/abort the current execution of the script.
+ *
+ * @see requestCommandHalt()
+ * @return Returns @c true if the script should halt. @c false otherwise.
+ */
+bool CommandRunner::isHaltRequested() const
+{
+    QMutexLocker lock(&m_haltMutex);
+    return m_halt;
 }
 
 void CommandRunner::run()
