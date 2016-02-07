@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     if (NULL != m_view)
     {
-        m_scene.setView(m_view);
+        m_view->setScene(&m_scene.scene());
         m_view->centerOn(0.0, 0.0);
         m_view->show();
     }

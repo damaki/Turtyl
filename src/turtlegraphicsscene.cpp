@@ -26,7 +26,6 @@ static const int DEFAULT_SIZE = 2048;
 TurtleGraphicsScene::TurtleGraphicsScene() :
     m_scene(),
     m_pixmap(DEFAULT_SIZE, DEFAULT_SIZE),
-    m_view(NULL),
     m_isAntialiasingEnabled(false)
 {
     clear();
@@ -66,20 +65,6 @@ void TurtleGraphicsScene::setCanvasSize(int newSize)
                            m_pixmap.rect());
 
         m_pixmap = newpixmap;
-    }
-}
-
-QGraphicsView* TurtleGraphicsScene::view() const
-{
-    return m_view;
-}
-
-void TurtleGraphicsScene::setView(QGraphicsView* const view)
-{
-    m_view = view;
-    if (view != NULL)
-    {
-        view->setScene(&m_scene);
     }
 }
 

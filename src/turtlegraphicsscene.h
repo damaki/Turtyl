@@ -39,9 +39,6 @@ public:
     QGraphicsScene& scene();
     const QGraphicsScene& scene() const;
 
-    QGraphicsView* view() const;
-    void setView(QGraphicsView* view);
-
     int canvasSize() const;
     void setCanvasSize(int newSize);
 
@@ -65,8 +62,6 @@ private:
     QPixmap m_pixmap;
 
     QPen m_pen;
-
-    QGraphicsView* m_view;
 
     bool m_isAntialiasingEnabled;
 };
