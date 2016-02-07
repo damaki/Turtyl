@@ -63,11 +63,12 @@ private:
     QMutex m_mutex;
     QGraphicsScene m_scene;
     QPixmap m_pixmap;
-    QPainter m_painter;
 
     QPen m_pen;
 
     QGraphicsView* m_view;
+
+    bool m_isAntialiasingEnabled;
 };
 
 #endif // TURTLEGRAPHICSVIEW_H
