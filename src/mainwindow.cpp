@@ -30,7 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_view(NULL),
     m_scene(),
     m_cmds(&m_scene),
-    m_prefsDialog(new PreferencesDialog(&m_scene))
+    m_prefsDialog(new PreferencesDialog(&m_scene, this)),
+    m_helpDialog(new HelpDialog(this))
 {
     ui->setupUi(this);
 
@@ -60,6 +61,12 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         connect(prefsAction, SIGNAL(triggered()), m_prefsDialog, SLOT(show()));
         connect(prefsAction, SIGNAL(triggered()), m_prefsDialog, SLOT(loadPreferences()));
+    }
+
+    QAction* helpAction = findChild<QAction*>("action_About");
+    if (NULL != helpAction)
+    {
+        connect(helpAction, SIGNAL(triggered()), m_helpDialog, SLOT(show()));
     }
 
     connect(&m_cmds, SIGNAL(commandError(QString)), this, SLOT(handleError(QString)));

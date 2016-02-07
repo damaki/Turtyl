@@ -11,22 +11,28 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = tartaruga
 TEMPLATE = app
 
+VERSION = 0.1.0
+
+DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 SOURCES += src/main.cpp\
     src/mainwindow.cpp \
     src/commandrunner.cpp \
     src/basiccommands.cpp \
     src/turtlegraphicsscene.cpp \
-    src/preferencesdialog.cpp
+    src/preferencesdialog.cpp \
+    src/helpdialog.cpp
 
 HEADERS  += src/mainwindow.h \
     src/commandrunner.h \
     src/basiccommands.h \
     src/turtlegraphicsscene.h \
-    src/preferencesdialog.h
+    src/preferencesdialog.h \
+    src/helpdialog.h
 
 FORMS    += forms/mainwindow.ui \
-    forms/preferencesdialog.ui
+    forms/preferencesdialog.ui \
+    forms/helpdialog.ui
 
 # Lua sources
 INCLUDEPATH += src/lua

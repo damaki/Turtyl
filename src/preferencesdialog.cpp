@@ -1,7 +1,9 @@
 #include "preferencesdialog.h"
 #include "ui_preferencesdialog.h"
 
-PreferencesDialog::PreferencesDialog(TurtleGraphicsScene* const scene) :
+PreferencesDialog::PreferencesDialog(TurtleGraphicsScene* const scene,
+                                     QWidget* const parent) :
+    QDialog(parent),
     ui(new Ui::PreferencesDialog),
     m_scene(scene)
 {

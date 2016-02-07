@@ -16,7 +16,7 @@ class PreferencesDialog : public QDialog
     Q_OBJECT
 
 public:
-    PreferencesDialog(TurtleGraphicsScene* scene);
+    PreferencesDialog(TurtleGraphicsScene* scene, QWidget* parent = 0);
     ~PreferencesDialog();
 
 public slots:

@@ -26,6 +26,7 @@
 #include <QPlainTextEdit>
 #include <QSpinBox>
 #include "commandrunner.h"
+#include "helpdialog.h"
 #include "preferencesdialog.h"
 #include "turtlegraphicsscene.h"
 
@@ -55,6 +56,7 @@ private:
     CommandRunner m_cmds;
 
     PreferencesDialog* m_prefsDialog;
+    HelpDialog* m_helpDialog;
 };
 
 #endif // MAINWINDOW_H
