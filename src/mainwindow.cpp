@@ -23,13 +23,16 @@
 #include <cmath>
 #include <iostream>
 
+static const int VIEW_UPDATE_DELAY = 33; // update every 33ms (~30 fps)
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     m_scene(),
     m_cmds(&m_scene),
     m_prefsDialog(new PreferencesDialog(&m_scene, this)),
-    m_helpDialog(new HelpDialog(this))
+    m_helpDialog(new HelpDialog(this)),
+    m_timerId(0)
 {
     ui->setupUi(this);
 
@@ -77,6 +80,11 @@ void MainWindow::closeEvent(QCloseEvent *)
     m_cmds.wait();
 }
 
+void MainWindow::timerEvent(QTimerEvent *)
+{
+    m_scene.updateScene();
+}
+
 void MainWindow::runCommand()
 {
     m_cmds.runCommand(ui->cmdEdit->document()->toPlainText());
@@ -85,6 +93,8 @@ void MainWindow::runCommand()
     ui->runButton->setEnabled(false);
     ui->haltButton->setEnabled(true);
     ui->pauseButton->setEnabled(true);
+
+    m_timerId = startTimer(VIEW_UPDATE_DELAY);
 }
 
 void MainWindow::handleError(const QString& message)
@@ -93,13 +103,13 @@ void MainWindow::handleError(const QString& message)
     std::cerr << message.toStdString() << std::endl;
 }
 
-void MainWindow::commandUpdate()
-{
-    m_scene.updateScene();
-}
-
 void MainWindow::commandFinished()
 {
+    if (m_timerId != 0)
+    {
+        killTimer(m_timerId);
+    }
+
     m_scene.updateScene();
 
     ui->runButton->setEnabled(true);
@@ -110,6 +120,12 @@ void MainWindow::commandFinished()
 
 void MainWindow::pauseCommand()
 {
+    // Don't refresh the view while the user script is paused
+    if (m_timerId != 0)
+    {
+        killTimer(m_timerId);
+    }
+
     ui->pauseButton->setEnabled(false);
     ui->resumeButton->setEnabled(true);
 
@@ -118,6 +134,8 @@ void MainWindow::pauseCommand()
 
 void MainWindow::resumeCommand()
 {
+    m_timerId = startTimer(VIEW_UPDATE_DELAY);
+
     ui->pauseButton->setEnabled(true);
     ui->resumeButton->setEnabled(false);
 

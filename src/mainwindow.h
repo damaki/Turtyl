@@ -44,11 +44,11 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent *event);
+    virtual void timerEvent(QTimerEvent *event);
 
 private slots:
     void runCommand();
     void handleError(const QString& message);
-    void commandUpdate();
     void commandFinished();
     void pauseCommand();
     void resumeCommand();
@@ -63,6 +63,8 @@ private:
 
     PreferencesDialog* m_prefsDialog;
     HelpDialog* m_helpDialog;
+
+    int m_timerId;
 };
 
 #endif // MAINWINDOW_H
