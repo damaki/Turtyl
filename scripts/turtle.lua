@@ -157,3 +157,23 @@ function home()
     turtle.position = {x=0.0, y=0.0}
     turtle.heading  = 0.0
 end
+
+function circle(radius)
+    local ispendown = turtle.pendown
+
+    pu()
+    rt(90)
+    fd(radius)
+
+    if ispendown then
+        pd()
+    end
+    arc(radius, 360)
+    pu()
+    bk(radius)
+    lt(90)
+
+    if ispendown then
+        pd()
+    end
+end
