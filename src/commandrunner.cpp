@@ -136,11 +136,7 @@ void CommandRunner::run()
                 }
             }
 
-            if (success)
-            {
-                emit commandFinished();
-            }
-            else
+            if (!success)
             {
                 const char* errmsg = lua_tostring(m_state, -1);
                 if (NULL != errmsg)
@@ -148,6 +144,9 @@ void CommandRunner::run()
                     emit commandError(QString(errmsg));
                 }
             }
+
+            // Always emit commandFinished() at the end of a script, regardless of errors
+            emit commandFinished();
         }
     }
 }

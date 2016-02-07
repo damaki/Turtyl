@@ -35,8 +35,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    m_cmdEdit = findChild<QPlainTextEdit*>("cmdEdit");
-    m_view    = findChild<QGraphicsView*>("graphicsView");
+    m_cmdEdit      = findChild<QPlainTextEdit*>("cmdEdit");
+    m_view         = findChild<QGraphicsView*>("graphicsView");
+    m_runButton    = findChild<QPushButton*>("runButton");
+    m_haltButton   = findChild<QPushButton*>("haltButton");
+    m_pauseButton  = findChild<QPushButton*>("pauseButton");
+    m_resumeButton = findChild<QPushButton*>("resumeButton");
+
+    QAction* prefsAction = findChild<QAction*>("action_Preferences");
+    QAction* helpAction  = findChild<QAction*>("action_About");
 
     if (NULL != m_view)
     {
@@ -45,21 +52,35 @@ MainWindow::MainWindow(QWidget *parent) :
         m_view->show();
     }
 
-    // Connect the "Run" button to runCommand()
-    QPushButton* runButton = findChild<QPushButton*>("runButton");
-    if (runButton != NULL)
+    if (m_runButton != NULL)
     {
-        connect(runButton, SIGNAL(clicked()), this, SLOT(runCommand()));
+        connect(m_runButton, SIGNAL(clicked()), this, SLOT(runCommand()));
     }
 
-    QAction* prefsAction = findChild<QAction*>("action_Preferences");
+    if (NULL != m_haltButton)
+    {
+        m_haltButton->setEnabled(false);
+        connect(m_haltButton, SIGNAL(clicked()), this, SLOT(haltCommand()));
+    }
+
+    if (NULL != m_pauseButton)
+    {
+        m_pauseButton->setEnabled(false);
+        connect(m_pauseButton, SIGNAL(clicked()), this, SLOT(pauseCommand()));
+    }
+
+    if (NULL != m_resumeButton)
+    {
+        m_resumeButton->setEnabled(false);
+        connect(m_resumeButton, SIGNAL(clicked()), this, SLOT(resumeCommand()));
+    }
+
     if (NULL != prefsAction)
     {
         connect(prefsAction, SIGNAL(triggered()), m_prefsDialog, SLOT(show()));
         connect(prefsAction, SIGNAL(triggered()), m_prefsDialog, SLOT(loadPreferences()));
     }
 
-    QAction* helpAction = findChild<QAction*>("action_About");
     if (NULL != helpAction)
     {
         connect(helpAction, SIGNAL(triggered()), m_helpDialog, SLOT(show()));
@@ -97,6 +118,19 @@ void MainWindow::runCommand()
     {
         m_cmds.runCommand(m_cmdEdit->document()->toPlainText());
         m_scene.updateScene();
+
+        if (NULL != m_runButton)
+        {
+            m_runButton->setEnabled(false);
+        }
+        if (NULL != m_haltButton)
+        {
+            m_haltButton->setEnabled(true);
+        }
+        if (NULL != m_pauseButton)
+        {
+            m_pauseButton->setEnabled(true);
+        }
     }
 }
 
@@ -114,4 +148,65 @@ void MainWindow::commandUpdate()
 void MainWindow::commandFinished()
 {
     m_scene.updateScene();
+
+    if (NULL != m_runButton)
+    {
+        m_runButton->setEnabled(true);
+    }
+    if (NULL != m_haltButton)
+    {
+        m_haltButton->setEnabled(false);
+    }
+    if (NULL != m_pauseButton)
+    {
+        m_pauseButton->setEnabled(false);
+    }
+    if (NULL != m_resumeButton)
+    {
+        m_resumeButton->setEnabled(false);
+    }
+}
+
+void MainWindow::pauseCommand()
+{
+    if (NULL != m_pauseButton)
+    {
+        m_pauseButton->setEnabled(false);
+    }
+    if (NULL != m_resumeButton)
+    {
+        m_resumeButton->setEnabled(true);
+    }
+}
+
+void MainWindow::resumeCommand()
+{
+    if (NULL != m_pauseButton)
+    {
+        m_pauseButton->setEnabled(true);
+    }
+    if (NULL != m_resumeButton)
+    {
+        m_resumeButton->setEnabled(false);
+    }
+}
+
+void MainWindow::haltCommand()
+{
+    if (NULL != m_runButton)
+    {
+        m_runButton->setEnabled(false);
+    }
+    if (NULL != m_haltButton)
+    {
+        m_haltButton->setEnabled(false);
+    }
+    if (NULL != m_pauseButton)
+    {
+        m_pauseButton->setEnabled(false);
+    }
+    if (NULL != m_resumeButton)
+    {
+        m_resumeButton->setEnabled(false);
+    }
 }

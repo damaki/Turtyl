@@ -50,6 +50,9 @@ private slots:
     void handleError(const QString& message);
     void commandUpdate();
     void commandFinished();
+    void pauseCommand();
+    void resumeCommand();
+    void haltCommand();
 
 private:
 
@@ -57,6 +60,11 @@ private:
 
     QPlainTextEdit* m_cmdEdit;
     QGraphicsView* m_view;
+    QPushButton* m_runButton;
+    QPushButton* m_pauseButton;
+    QPushButton* m_resumeButton;
+    QPushButton* m_haltButton;
+
     TurtleGraphicsScene m_scene;
     CommandRunner m_cmds;
 
