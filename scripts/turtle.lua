@@ -1,3 +1,13 @@
+-------------------------------------------------------------------------------
+-- Turtle class.
+--
+-- The turtle class manages the state for a turtle:
+--   * position
+--   * heading
+--   * pen color
+--   * thickness
+--   * pen state (up or down)
+--   * pen thickness
 local Turtle = {}
 Turtle.__index = Turtle
 
@@ -109,34 +119,23 @@ function setsize(size)
 end
 
 function color(r,g,b)
-    if r == nil then
-        error("missing argument to color()")
+    assert(r ~= nil, "missing argument to color()")
+
+    -- If only the 'r' parameter is given (the others are nil) then
+    -- 'r' is treated as a color table (containing RGB values).
+    if r ~= nil and g == nil and b == nil then
+        if r["r"] ~= nil and
+           r["g"] ~= nil and
+           r["b"] ~= nil then
+            turtle.pencolor = r
+        else
+            error("The color passed to color() must have 'r', 'g', and 'b' values")
+        end
 
     else
-        -- If only the 'r' parameter is given (the others are nil) then
-        -- 'r' is treated as a color table (containing RGB values).
-        if r ~= nil and g == nil and b == nil then
-            if r["r"] ~= nil and
-               r["g"] ~= nil and
-               r["b"] ~= nil then
-                turtle.pencolor = r
-            else
-                error("invalid color")
-            end
+       assert(g ~= nil and b ~= nil, "expected 3 number arguments to color()")
 
-        else
-            if r == nil then
-               r = 0
-            end
-            if g == nil then
-               g = 0
-            end
-            if b == nil then
-               b = 0
-            end
-
-            turtle.pencolor = {r=r, g=g, b=b}
-        end
+        turtle.pencolor = {r=r, g=g, b=b}
     end
 end
 
