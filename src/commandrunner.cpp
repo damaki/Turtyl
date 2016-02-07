@@ -19,7 +19,7 @@
  ***********************************************************************/
 #include "commandrunner.h"
 #include "basiccommands.h"
-#include <iostream>
+#include <QMutexLocker>
 
 CommandRunner::CommandRunner(TurtleGraphicsScene* const scene) :
     m_state(luaL_newstate()),
@@ -40,6 +40,12 @@ CommandRunner::CommandRunner(TurtleGraphicsScene* const scene) :
     setupCommands(m_state, scene);
 }
 
+void CommandRunner::requestThreadStop()
+{
+    requestInterruption();
+    m_scriptDataSema.release();
+}
+
 /**
  * @brief Executes a Lua script script.
  *
@@ -49,9 +55,27 @@ CommandRunner::CommandRunner(TurtleGraphicsScene* const scene) :
  */
 void CommandRunner::runCommand(const QString& command)
 {
+    {
+        QMutexLocker lock(&m_scriptDataMutex);
+        m_scriptData.push_back(command);
+    }
+    m_scriptDataSema.release();
+}
+
+/**
+ * @brief Open and run a Lua script file.
+ *
+ * If an error occurs in either loading or running the script then the
+ * @c commandError signal is emitted.
+ *
+ * @param filename The name of the file to load and run.
+ */
+void CommandRunner::runScriptFile(const QString& filename)
+{
+    QMutexLocker lock(&m_luaMutex);
     bool success = false;
 
-    if (LUA_OK == luaL_loadstring(m_state, command.toStdString().c_str()))
+    if (LUA_OK == luaL_loadfile(m_state, filename.toStdString().c_str()))
     {
         if (LUA_OK == lua_pcall(m_state, 0, 0, 0))
         {
@@ -69,32 +93,61 @@ void CommandRunner::runCommand(const QString& command)
     }
 }
 
-/**
- * @brief Open and run a Lua script file.
- *
- * If an error occurs in either loading or running the script then the
- * @c commandError signal is emitted.
- *
- * @param filename The name of the file to load and run.
- */
-void CommandRunner::runScriptFile(const QString& filename)
+void CommandRunner::run()
 {
-    bool success = false;
+    QString scriptData;
+    bool hasScriptData;
 
-    if (LUA_OK == luaL_loadfile(m_state, filename.toStdString().c_str()))
+    while (!isInterruptionRequested())
     {
-        if (LUA_OK == lua_pcall(m_state, 0, 0, 0))
+        m_scriptDataSema.acquire();
+
+        if (isInterruptionRequested())
         {
-            success = true;
+            break;
         }
-    }
 
-    if (!success)
-    {
-        const char* errmsg = lua_tostring(m_state, -1);
-        if (NULL != errmsg)
+        // Check if there's any scripts in the queue
         {
-            emit commandError(QString(errmsg));
+            QMutexLocker lock(&m_scriptDataMutex);
+            if (m_scriptData.size() > 0)
+            {
+                scriptData = m_scriptData.front();
+                m_scriptData.pop_front();
+                hasScriptData = true;
+            }
+            else
+            {
+                hasScriptData = false;
+            }
+        }
+
+        // Execute the lua script (if any)
+        if (hasScriptData)
+        {
+            bool success = false;
+
+            QMutexLocker lock(&m_luaMutex);
+            if (LUA_OK == luaL_loadstring(m_state, scriptData.toStdString().c_str()))
+            {
+                if (LUA_OK == lua_pcall(m_state, 0, 0, 0))
+                {
+                    success = true;
+                }
+            }
+
+            if (success)
+            {
+                emit commandFinished();
+            }
+            else
+            {
+                const char* errmsg = lua_tostring(m_state, -1);
+                if (NULL != errmsg)
+                {
+                    emit commandError(QString(errmsg));
+                }
+            }
         }
     }
 }

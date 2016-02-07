@@ -65,7 +65,15 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(helpAction, SIGNAL(triggered()), m_helpDialog, SLOT(show()));
     }
 
-    connect(&m_cmds, SIGNAL(commandError(QString)), this, SLOT(handleError(QString)));
+    connect(&m_cmds, SIGNAL(commandError(QString)),
+            this,    SLOT(handleError(QString)),
+            Qt::QueuedConnection);
+
+    connect(&m_cmds, SIGNAL(commandFinished()),
+            this,    SLOT(commandFinished()),
+            Qt::QueuedConnection);
+
+    m_cmds.start();
 
     //TODO: Make startup scripts configurable.
     m_cmds.runScriptFile("turtle.lua");
@@ -74,6 +82,13 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::closeEvent(QCloseEvent *)
+{
+    // Stop the command thread
+    m_cmds.requestThreadStop();
+    m_cmds.wait();
 }
 
 void MainWindow::runCommand()
@@ -91,3 +106,12 @@ void MainWindow::handleError(const QString& message)
     std::cerr << message.toStdString() << std::endl;
 }
 
+void MainWindow::commandUpdate()
+{
+    m_scene.updateScene();
+}
+
+void MainWindow::commandFinished()
+{
+    m_scene.updateScene();
+}

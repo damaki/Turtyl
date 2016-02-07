@@ -42,9 +42,14 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+protected:
+    virtual void closeEvent(QCloseEvent *event);
+
 private slots:
     void runCommand();
     void handleError(const QString& message);
+    void commandUpdate();
+    void commandFinished();
 
 private:
 

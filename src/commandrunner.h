@@ -21,6 +21,10 @@
 #define COMMANDRUNNER_H
 
 #include <QGraphicsScene>
+#include <QThread>
+#include <QSemaphore>
+#include <QQueue>
+#include <QWaitCondition>
 #include "turtlegraphicsscene.h"
 #include "lua.hpp"
 
@@ -30,23 +34,35 @@
  * Errors produced when either loading/compiling or running a script
  * produce an error message via the @c commandError() signal.
  */
-class CommandRunner : public QObject
+class CommandRunner : public QThread
 {
     Q_OBJECT
 
 public:
     CommandRunner(TurtleGraphicsScene* scene);
 
+    void requestThreadStop();
+
     void runCommand(const QString& command);
 
     void runScriptFile(const QString& filename);
 
 signals:
+    void commandFinished();
     void commandError(const QString& message);
+
+protected:
+    virtual void run();
 
 private:
     lua_State* m_state;
     TurtleGraphicsScene* m_scene;
+
+    QMutex m_luaMutex; // locked while a script is running
+
+    QSemaphore m_scriptDataSema;
+    QMutex m_scriptDataMutex;
+    QQueue<QString> m_scriptData;
 };
 
 #endif // COMMANDRUNNER_H
