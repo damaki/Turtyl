@@ -20,6 +20,7 @@
 #include "turtlegraphicsscene.h"
 #include <QGraphicsItem>
 #include <QMutexLocker>
+#include <cassert>
 
 static const int DEFAULT_SIZE = 2048;
 
@@ -29,11 +30,17 @@ TurtleGraphicsScene::TurtleGraphicsScene() :
     m_isAntialiasingEnabled(false)
 {
     clear();
+
+    m_scenePixmap = m_scene.addPixmap(m_pixmap);
+    assert(m_scenePixmap != NULL);
+
     updateScene();
 }
 
 int TurtleGraphicsScene::canvasSize() const
 {
+    assert(m_pixmap.width() == m_pixmap.height()); // canvas should be square
+
     return m_pixmap.width();
 }
 
@@ -150,10 +157,9 @@ void TurtleGraphicsScene::drawArc(const QPointF& startPos,
 void TurtleGraphicsScene::updateScene()
 {
     QMutexLocker lock(&m_mutex);
-    m_scene.clear();
-    QGraphicsItem* item = m_scene.addPixmap(m_pixmap);
+    m_scenePixmap->setPixmap(m_pixmap);
 
     // Ensure the center of the pixmap is at the center of the scene
-    item->setPos(-static_cast<qreal>(m_pixmap.width()) / 2.0,
-                 -static_cast<qreal>(m_pixmap.height()) / 2.0);
+    m_scenePixmap->setPos(-static_cast<qreal>(m_pixmap.width()) / 2.0,
+                          -static_cast<qreal>(m_pixmap.height()) / 2.0);
 }

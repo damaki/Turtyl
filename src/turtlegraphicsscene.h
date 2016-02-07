@@ -60,6 +60,7 @@ private:
     QMutex m_mutex;
     QGraphicsScene m_scene;
     QPixmap m_pixmap;
+    QGraphicsPixmapItem* m_scenePixmap;
 
     QPen m_pen;
 
