@@ -29,6 +29,7 @@ TurtleGraphicsScene::TurtleGraphicsScene() :
     m_painter(&m_pixmap)
 {
     clear();
+    updateScene();
 }
 
 int TurtleGraphicsScene::canvasSize() const

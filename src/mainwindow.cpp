@@ -41,10 +41,6 @@ MainWindow::MainWindow(QWidget *parent) :
     if (NULL != m_view)
     {
         m_view->setScene(&m_scene.scene());
-
-        // Setup an initial scene rect. Otherwise, some drawings aren't centered properly.
-        m_view->setSceneRect(QRectF(-1.0, -1.0, 2.0, 2.0));
-
         m_view->centerOn(0.0, 0.0);
         m_view->show();
     }
