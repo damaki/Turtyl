@@ -58,13 +58,6 @@ private:
 
     Ui::MainWindow *ui;
 
-    QPlainTextEdit* m_cmdEdit;
-    QGraphicsView* m_view;
-    QPushButton* m_runButton;
-    QPushButton* m_pauseButton;
-    QPushButton* m_resumeButton;
-    QPushButton* m_haltButton;
-
     TurtleGraphicsScene m_scene;
     CommandRunner m_cmds;
 

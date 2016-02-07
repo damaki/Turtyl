@@ -37,8 +37,6 @@ public:
 
 private:
     Ui::HelpDialog *ui;
-
-    QTextEdit* m_descriptionTextEdit;
 };
 
 #endif // HELPDIALOG_H

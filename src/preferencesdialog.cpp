@@ -28,9 +28,6 @@ PreferencesDialog::PreferencesDialog(TurtleGraphicsScene* const scene,
 {
     ui->setupUi(this);
 
-    m_prefAntialiasing = findChild<QCheckBox*>("antialiasingCheckBox");
-    m_prefCanvasSize   = findChild<QSpinBox*>("canvasSizeSpinBox");
-
     connect(this, SIGNAL(accepted()), this, SLOT(applyPreferences()));
 }
 
@@ -43,15 +40,8 @@ void PreferencesDialog::loadPreferences()
 {
     if (NULL != m_scene)
     {
-        if (NULL != m_prefAntialiasing)
-        {
-            m_prefAntialiasing->setChecked(m_scene->antialiasingEnabled());
-        }
-
-        if (NULL != m_prefCanvasSize)
-        {
-            m_prefCanvasSize->setValue(m_scene->canvasSize());
-        }
+        ui->antialiasingCheckBox->setChecked(m_scene->antialiasingEnabled());
+        ui->canvasSizeSpinBox->setValue(m_scene->canvasSize());
     }
 }
 
@@ -59,15 +49,8 @@ void PreferencesDialog::applyPreferences()
 {
     if (NULL != m_scene)
     {
-        if (NULL != m_prefAntialiasing)
-        {
-            m_scene->setAntialiasing(m_prefAntialiasing->checkState() == Qt::Checked);
-        }
-
-        if (NULL != m_prefCanvasSize)
-        {
-            m_scene->setCanvasSize(m_prefCanvasSize->value());
-        }
+        m_scene->setAntialiasing(ui->antialiasingCheckBox->checkState() == Qt::Checked);
+        m_scene->setCanvasSize(ui->canvasSizeSpinBox->value());
 
         m_scene->updateScene();
     }

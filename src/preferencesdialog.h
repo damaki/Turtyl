@@ -46,9 +46,6 @@ private:
     Ui::PreferencesDialog* ui;
 
     TurtleGraphicsScene* m_scene;
-
-    QCheckBox* m_prefAntialiasing;
-    QSpinBox* m_prefCanvasSize;
 };
 
 #endif // PREFERENCESDIALOG_H

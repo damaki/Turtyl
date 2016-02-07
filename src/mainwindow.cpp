@@ -26,8 +26,6 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_cmdEdit(NULL),
-    m_view(NULL),
     m_scene(),
     m_cmds(&m_scene),
     m_prefsDialog(new PreferencesDialog(&m_scene, this)),
@@ -35,56 +33,22 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    m_cmdEdit      = findChild<QPlainTextEdit*>("cmdEdit");
-    m_view         = findChild<QGraphicsView*>("graphicsView");
-    m_runButton    = findChild<QPushButton*>("runButton");
-    m_haltButton   = findChild<QPushButton*>("haltButton");
-    m_pauseButton  = findChild<QPushButton*>("pauseButton");
-    m_resumeButton = findChild<QPushButton*>("resumeButton");
+    ui->graphicsView->setScene(&m_scene.scene());
+    ui->graphicsView->centerOn(0.0, 0.0);
+    ui->graphicsView->show();
 
-    QAction* prefsAction = findChild<QAction*>("action_Preferences");
-    QAction* helpAction  = findChild<QAction*>("action_About");
+    ui->haltButton->setEnabled(false);
+    ui->pauseButton->setEnabled(false);
+    ui->resumeButton->setEnabled(false);
 
-    if (NULL != m_view)
-    {
-        m_view->setScene(&m_scene.scene());
-        m_view->centerOn(0.0, 0.0);
-        m_view->show();
-    }
+    connect(ui->runButton,    SIGNAL(clicked()), this, SLOT(runCommand()));
+    connect(ui->haltButton,   SIGNAL(clicked()), this, SLOT(haltCommand()));
+    connect(ui->pauseButton,  SIGNAL(clicked()), this, SLOT(pauseCommand()));
+    connect(ui->resumeButton, SIGNAL(clicked()), this, SLOT(resumeCommand()));
 
-    if (m_runButton != NULL)
-    {
-        connect(m_runButton, SIGNAL(clicked()), this, SLOT(runCommand()));
-    }
-
-    if (NULL != m_haltButton)
-    {
-        m_haltButton->setEnabled(false);
-        connect(m_haltButton, SIGNAL(clicked()), this, SLOT(haltCommand()));
-    }
-
-    if (NULL != m_pauseButton)
-    {
-        m_pauseButton->setEnabled(false);
-        connect(m_pauseButton, SIGNAL(clicked()), this, SLOT(pauseCommand()));
-    }
-
-    if (NULL != m_resumeButton)
-    {
-        m_resumeButton->setEnabled(false);
-        connect(m_resumeButton, SIGNAL(clicked()), this, SLOT(resumeCommand()));
-    }
-
-    if (NULL != prefsAction)
-    {
-        connect(prefsAction, SIGNAL(triggered()), m_prefsDialog, SLOT(show()));
-        connect(prefsAction, SIGNAL(triggered()), m_prefsDialog, SLOT(loadPreferences()));
-    }
-
-    if (NULL != helpAction)
-    {
-        connect(helpAction, SIGNAL(triggered()), m_helpDialog, SLOT(show()));
-    }
+    connect(ui->action_Preferences, SIGNAL(triggered()), m_prefsDialog, SLOT(show()));
+    connect(ui->action_Preferences, SIGNAL(triggered()), m_prefsDialog, SLOT(loadPreferences()));
+    connect(ui->action_About,       SIGNAL(triggered()), m_helpDialog,  SLOT(show()));
 
     connect(&m_cmds, SIGNAL(commandError(QString)),
             this,    SLOT(handleError(QString)),
@@ -94,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
             this,    SLOT(commandFinished()),
             Qt::QueuedConnection);
 
-    m_cmds.setView(m_view);
+    m_cmds.setView(ui->graphicsView);
     m_cmds.start();
 
     //TODO: Make startup scripts configurable.
@@ -115,24 +79,12 @@ void MainWindow::closeEvent(QCloseEvent *)
 
 void MainWindow::runCommand()
 {
-    if (NULL != m_cmdEdit)
-    {
-        m_cmds.runCommand(m_cmdEdit->document()->toPlainText());
-        m_scene.updateScene();
+    m_cmds.runCommand(ui->cmdEdit->document()->toPlainText());
+    m_scene.updateScene();
 
-        if (NULL != m_runButton)
-        {
-            m_runButton->setEnabled(false);
-        }
-        if (NULL != m_haltButton)
-        {
-            m_haltButton->setEnabled(true);
-        }
-        if (NULL != m_pauseButton)
-        {
-            m_pauseButton->setEnabled(true);
-        }
-    }
+    ui->runButton->setEnabled(false);
+    ui->haltButton->setEnabled(true);
+    ui->pauseButton->setEnabled(true);
 }
 
 void MainWindow::handleError(const QString& message)
@@ -150,70 +102,34 @@ void MainWindow::commandFinished()
 {
     m_scene.updateScene();
 
-    if (NULL != m_runButton)
-    {
-        m_runButton->setEnabled(true);
-    }
-    if (NULL != m_haltButton)
-    {
-        m_haltButton->setEnabled(false);
-    }
-    if (NULL != m_pauseButton)
-    {
-        m_pauseButton->setEnabled(false);
-    }
-    if (NULL != m_resumeButton)
-    {
-        m_resumeButton->setEnabled(false);
-    }
+    ui->runButton->setEnabled(true);
+    ui->haltButton->setEnabled(false);
+    ui->pauseButton->setEnabled(false);
+    ui->resumeButton->setEnabled(false);
 }
 
 void MainWindow::pauseCommand()
 {
-    if (NULL != m_pauseButton)
-    {
-        m_pauseButton->setEnabled(false);
-    }
-    if (NULL != m_resumeButton)
-    {
-        m_resumeButton->setEnabled(true);
-    }
+    ui->pauseButton->setEnabled(false);
+    ui->resumeButton->setEnabled(true);
 
     m_cmds.requestCommandPause();
 }
 
 void MainWindow::resumeCommand()
 {
-    if (NULL != m_pauseButton)
-    {
-        m_pauseButton->setEnabled(true);
-    }
-    if (NULL != m_resumeButton)
-    {
-        m_resumeButton->setEnabled(false);
-    }
+    ui->pauseButton->setEnabled(true);
+    ui->resumeButton->setEnabled(false);
 
     m_cmds.requestCommandResume();
 }
 
 void MainWindow::haltCommand()
 {
-    if (NULL != m_runButton)
-    {
-        m_runButton->setEnabled(false);
-    }
-    if (NULL != m_haltButton)
-    {
-        m_haltButton->setEnabled(false);
-    }
-    if (NULL != m_pauseButton)
-    {
-        m_pauseButton->setEnabled(false);
-    }
-    if (NULL != m_resumeButton)
-    {
-        m_resumeButton->setEnabled(false);
-    }
+    ui->runButton->setEnabled(false);
+    ui->haltButton->setEnabled(false);
+    ui->pauseButton->setEnabled(false);
+    ui->resumeButton->setEnabled(false);
 
     m_cmds.requestCommandHalt();
 }
