@@ -20,12 +20,13 @@
 #include "basiccommands.h"
 #include "commandrunner.h"
 #include <cassert>
+#include <QPen>
 
 static const int DRAW_LINE_ARGS_COUNT = 8;
 static const int DRAW_ARC_ARGS_COUNT = 9;
 static const int SET_BACKGROUND_COLOR_ARGS_COUNT = 3;
 
-static const char* LUA_PARENT_NAME = "_tartargua_parent";
+static const char* LUA_PARENT_NAME = "_turtyl_parent";
 
 
 /**
@@ -158,7 +159,7 @@ int drawLine(lua_State* state)
 
     QPen pen(QBrush(color), arguments[7]);
 
-    getParent(state).scene()->drawLine(line, pen);
+    getParent(state).graphicsWidget()->drawLine(line, pen);
 
     return 0;
 }
@@ -224,7 +225,7 @@ int drawArc(lua_State* state)
 
     QPen pen(QBrush(color), arguments[8]);
 
-    getParent(state).scene()->drawArc(arcCenterPos, startAngle, angle, radius, pen);
+    getParent(state).graphicsWidget()->drawArc(arcCenterPos, startAngle, angle, radius, pen);
 
     return 0;
 }
@@ -239,7 +240,7 @@ int drawArc(lua_State* state)
  */
 int clear(lua_State* state)
 {
-    getParent(state).scene()->clear();
+    getParent(state).graphicsWidget()->clear();
     return 0;
 }
 
@@ -275,12 +276,7 @@ int setBackgroundColor(lua_State* state)
                  static_cast<int>(arguments[1]),
                  static_cast<int>(arguments[2]));
 
-    QGraphicsView* view = getParent(state).view();
-    assert(view != NULL);
-    if (view != NULL)
-    {
-        view->setBackgroundBrush(QBrush(color));
-    }
+    getParent(state).graphicsWidget()->setBackgroundColor(color);
 
     return 0;
 }

@@ -20,12 +20,11 @@
 #ifndef COMMANDRUNNER_H
 #define COMMANDRUNNER_H
 
-#include <QGraphicsScene>
 #include <QThread>
 #include <QSemaphore>
 #include <QQueue>
 #include <QWaitCondition>
-#include "turtlegraphicsscene.h"
+#include "turtlegraphicswidget.h"
 #include "lua.hpp"
 
 /**
@@ -39,12 +38,9 @@ class CommandRunner : public QThread
     Q_OBJECT
 
 public:
-    CommandRunner(TurtleGraphicsScene* scene);
+    CommandRunner(TurtleGraphicsWidget* graphicsWidget);
 
-    TurtleGraphicsScene* scene() const;
-
-    QGraphicsView* view() const;
-    void setView(QGraphicsView* view);
+    TurtleGraphicsWidget* graphicsWidget() const;
 
     void requestThreadStop();
 
@@ -68,8 +64,7 @@ protected:
 
 private:
     lua_State* m_state;
-    TurtleGraphicsScene* m_scene;
-    QGraphicsView* m_view;
+    TurtleGraphicsWidget* m_graphicsWidget;
 
     mutable QMutex m_luaMutex; // locked while a script is running
 

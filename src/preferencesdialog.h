@@ -23,7 +23,7 @@
 #include <QCheckBox>
 #include <QDialog>
 #include <QSpinBox>
-#include "turtlegraphicsscene.h"
+#include "turtlegraphicswidget.h"
 
 namespace Ui
 {
@@ -35,7 +35,7 @@ class PreferencesDialog : public QDialog
     Q_OBJECT
 
 public:
-    PreferencesDialog(TurtleGraphicsScene* scene, QWidget* parent = 0);
+    PreferencesDialog(TurtleGraphicsWidget* graphicsWidget, QWidget* parent = 0);
     ~PreferencesDialog();
 
 public slots:
@@ -45,7 +45,7 @@ public slots:
 private:
     Ui::PreferencesDialog* ui;
 
-    TurtleGraphicsScene* m_scene;
+    TurtleGraphicsWidget* m_graphicsWidget;
 };
 
 #endif // PREFERENCESDIALOG_H

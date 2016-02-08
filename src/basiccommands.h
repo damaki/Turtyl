@@ -20,7 +20,6 @@
 #ifndef BASICCOMMANDS_H
 #define BASICCOMMANDS_H
 
-#include "turtlegraphicsscene.h"
 #include "lua.hpp"
 
 class CommandRunner;

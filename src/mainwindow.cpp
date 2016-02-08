@@ -19,6 +19,7 @@
  ***********************************************************************/
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QScrollBar>
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -28,17 +29,20 @@ static const int VIEW_UPDATE_DELAY = 33; // update every 33ms (~30 fps)
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_scene(),
-    m_cmds(&m_scene),
-    m_prefsDialog(new PreferencesDialog(&m_scene, this)),
-    m_helpDialog(new HelpDialog(this)),
-    m_timerId(0)
+    m_turtleGraphics(new TurtleGraphicsWidget),
+    m_cmds(m_turtleGraphics),
+    m_prefsDialog(new PreferencesDialog(m_turtleGraphics, this)),
+    m_helpDialog(new HelpDialog(this))
 {
     ui->setupUi(this);
 
-    ui->graphicsView->setScene(&m_scene.scene());
-    ui->graphicsView->centerOn(0.0, 0.0);
-    ui->graphicsView->show();
+    m_turtleGraphics->show();
+    ui->scrollArea->setWidget(m_turtleGraphics);
+
+    // Make the scroll area occupy as much as possible.
+    // (the size will be constrained to the maximum possible according to the
+    //  layout, which will be less than this MainWindow's size).
+    ui->scrollArea->resize(width(), height());
 
     ui->haltButton->setEnabled(false);
     ui->pauseButton->setEnabled(false);
@@ -61,7 +65,6 @@ MainWindow::MainWindow(QWidget *parent) :
             this,    SLOT(commandFinished()),
             Qt::QueuedConnection);
 
-    m_cmds.setView(ui->graphicsView);
     m_cmds.start();
 
     //TODO: Make startup scripts configurable.
@@ -80,21 +83,13 @@ void MainWindow::closeEvent(QCloseEvent *)
     m_cmds.wait();
 }
 
-void MainWindow::timerEvent(QTimerEvent *)
-{
-    m_scene.updateScene();
-}
-
 void MainWindow::runCommand()
 {
     m_cmds.runCommand(ui->cmdEdit->document()->toPlainText());
-    m_scene.updateScene();
 
     ui->runButton->setEnabled(false);
     ui->haltButton->setEnabled(true);
     ui->pauseButton->setEnabled(true);
-
-    m_timerId = startTimer(VIEW_UPDATE_DELAY);
 }
 
 void MainWindow::handleError(const QString& message)
@@ -105,13 +100,6 @@ void MainWindow::handleError(const QString& message)
 
 void MainWindow::commandFinished()
 {
-    if (m_timerId != 0)
-    {
-        killTimer(m_timerId);
-    }
-
-    m_scene.updateScene();
-
     ui->runButton->setEnabled(true);
     ui->haltButton->setEnabled(false);
     ui->pauseButton->setEnabled(false);
@@ -120,12 +108,6 @@ void MainWindow::commandFinished()
 
 void MainWindow::pauseCommand()
 {
-    // Don't refresh the view while the user script is paused
-    if (m_timerId != 0)
-    {
-        killTimer(m_timerId);
-    }
-
     ui->pauseButton->setEnabled(false);
     ui->resumeButton->setEnabled(true);
 
@@ -134,8 +116,6 @@ void MainWindow::pauseCommand()
 
 void MainWindow::resumeCommand()
 {
-    m_timerId = startTimer(VIEW_UPDATE_DELAY);
-
     ui->pauseButton->setEnabled(true);
     ui->resumeButton->setEnabled(false);
 

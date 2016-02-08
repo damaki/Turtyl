@@ -22,10 +22,9 @@
 #include <QMutexLocker>
 #include <cassert>
 
-CommandRunner::CommandRunner(TurtleGraphicsScene* const scene) :
+CommandRunner::CommandRunner(TurtleGraphicsWidget* const graphicsWidget) :
     m_state(luaL_newstate()),
-    m_scene(scene),
-    m_view(NULL),
+    m_graphicsWidget(graphicsWidget),
     m_scriptDataSema(),
     m_scriptDataMutex(),
     m_scriptData(),
@@ -36,7 +35,7 @@ CommandRunner::CommandRunner(TurtleGraphicsScene* const scene) :
     m_halt(false)
 {
     assert(NULL != m_state);
-    assert(NULL != scene);
+    assert(NULL != graphicsWidget);
 
     // Load all libraries except io, os, and debug.
     // These libraries are omitted for security.
@@ -53,19 +52,9 @@ CommandRunner::CommandRunner(TurtleGraphicsScene* const scene) :
     setupCommands(m_state, this);
 }
 
-TurtleGraphicsScene* CommandRunner::scene() const
+TurtleGraphicsWidget* CommandRunner::graphicsWidget() const
 {
-    return m_scene;
-}
-
-QGraphicsView* CommandRunner::view() const
-{
-    return m_view;
-}
-
-void CommandRunner::setView(QGraphicsView* const view)
-{
-    m_view = view;
+    return m_graphicsWidget;
 }
 
 /**

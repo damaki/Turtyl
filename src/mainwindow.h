@@ -28,7 +28,7 @@
 #include "commandrunner.h"
 #include "helpdialog.h"
 #include "preferencesdialog.h"
-#include "turtlegraphicsscene.h"
+#include "turtlegraphicswidget.h"
 
 namespace Ui {
 class MainWindow;
@@ -44,7 +44,6 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent *event);
-    virtual void timerEvent(QTimerEvent *event);
 
 private slots:
     void runCommand();
@@ -55,16 +54,13 @@ private slots:
     void haltCommand();
 
 private:
-
     Ui::MainWindow *ui;
 
-    TurtleGraphicsScene m_scene;
+    TurtleGraphicsWidget* m_turtleGraphics;
     CommandRunner m_cmds;
 
     PreferencesDialog* m_prefsDialog;
     HelpDialog* m_helpDialog;
-
-    int m_timerId;
 };
 
 #endif // MAINWINDOW_H
