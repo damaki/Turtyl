@@ -26,8 +26,6 @@ HelpDialog::HelpDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->descriptionTextEdit = findChild<QTextEdit*>("descriptionTextEdit");
-
     // Make background transparent
     ui->descriptionTextEdit->viewport()->setAutoFillBackground(false);
 
