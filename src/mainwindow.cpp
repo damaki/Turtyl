@@ -24,29 +24,27 @@
 #include <cmath>
 #include <iostream>
 
-static const int VIEW_UPDATE_DELAY = 33; // update every 33ms (~30 fps)
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_turtleGraphics(new TurtleGraphicsWidget),
+    m_scene(new QGraphicsScene),
+    m_turtleGraphics(new TurtleGraphicsItem),
     m_cmds(m_turtleGraphics),
     m_prefsDialog(new PreferencesDialog(m_turtleGraphics, this)),
     m_helpDialog(new HelpDialog(this))
 {
     ui->setupUi(this);
 
-    m_turtleGraphics->show();
-    ui->scrollArea->setWidget(m_turtleGraphics);
+    ui->graphicsView->setScene(m_scene);
+    m_scene->addItem(m_turtleGraphics);
 
-    // Make the scroll area occupy as much as possible.
-    // (the size will be constrained to the maximum possible according to the
-    //  layout, which will be less than this MainWindow's size).
-    ui->scrollArea->resize(width(), height());
+    ui->graphicsView->centerOn(0.0, 0.0);
 
     ui->haltButton->setEnabled(false);
     ui->pauseButton->setEnabled(false);
     ui->resumeButton->setEnabled(false);
+
+    connect(m_turtleGraphics, SIGNAL(canvasResized()), this, SLOT(resizeGraphicsScene()));
 
     connect(ui->runButton,    SIGNAL(clicked()), this, SLOT(runCommand()));
     connect(ui->haltButton,   SIGNAL(clicked()), this, SLOT(haltCommand()));
@@ -98,6 +96,11 @@ void MainWindow::handleError(const QString& message)
     std::cerr << message.toStdString() << std::endl;
 }
 
+/**
+ * @brief Called when a command finishes executing.
+ *
+ * This method updates the UI's buttons to allow another command to be executed.
+ */
 void MainWindow::commandFinished()
 {
     ui->runButton->setEnabled(true);
@@ -106,6 +109,9 @@ void MainWindow::commandFinished()
     ui->resumeButton->setEnabled(false);
 }
 
+/**
+ * @brief Pauses the currently executing command(s)
+ */
 void MainWindow::pauseCommand()
 {
     ui->pauseButton->setEnabled(false);
@@ -114,6 +120,9 @@ void MainWindow::pauseCommand()
     m_cmds.requestCommandPause();
 }
 
+/**
+ * @brief Resumes a previously paused command.
+ */
 void MainWindow::resumeCommand()
 {
     ui->pauseButton->setEnabled(true);
@@ -122,6 +131,9 @@ void MainWindow::resumeCommand()
     m_cmds.requestCommandResume();
 }
 
+/**
+ * @brief Halts/stops/aborts the currently running command.
+ */
 void MainWindow::haltCommand()
 {
     ui->runButton->setEnabled(false);
@@ -130,4 +142,14 @@ void MainWindow::haltCommand()
     ui->resumeButton->setEnabled(false);
 
     m_cmds.requestCommandHalt();
+}
+
+/**
+ * @brief Resets the QGraphicsScene to perfectly fit the turtle graphic's bounding box.
+ *
+ * This avoids unused space around the drawing canvas when the canvas size is reduced.
+ */
+void MainWindow::resizeGraphicsScene()
+{
+    m_scene->setSceneRect(m_turtleGraphics->boundingRect().translated(m_turtleGraphics->pos()));
 }

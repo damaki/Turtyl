@@ -53,10 +53,13 @@ private slots:
     void resumeCommand();
     void haltCommand();
 
+    void resizeGraphicsScene();
+
 private:
     Ui::MainWindow *ui;
 
-    TurtleGraphicsWidget* m_turtleGraphics;
+    QGraphicsScene* m_scene;
+    TurtleGraphicsItem* m_turtleGraphics;
     CommandRunner m_cmds;
 
     PreferencesDialog* m_prefsDialog;

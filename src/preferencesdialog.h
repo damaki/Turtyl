@@ -35,7 +35,7 @@ class PreferencesDialog : public QDialog
     Q_OBJECT
 
 public:
-    PreferencesDialog(TurtleGraphicsWidget* graphicsWidget, QWidget* parent = 0);
+    PreferencesDialog(TurtleGraphicsItem* graphicsWidget, QWidget* parent = 0);
     ~PreferencesDialog();
 
 public slots:
@@ -45,7 +45,7 @@ public slots:
 private:
     Ui::PreferencesDialog* ui;
 
-    TurtleGraphicsWidget* m_graphicsWidget;
+    TurtleGraphicsItem* m_graphicsWidget;
 };
 
 #endif // PREFERENCESDIALOG_H

@@ -20,7 +20,7 @@
 #include "preferencesdialog.h"
 #include "ui_preferencesdialog.h"
 
-PreferencesDialog::PreferencesDialog(TurtleGraphicsWidget* const graphicsWidget,
+PreferencesDialog::PreferencesDialog(TurtleGraphicsItem* const graphicsWidget,
                                      QWidget* const parent) :
     QDialog(parent),
     ui(new Ui::PreferencesDialog),
@@ -41,7 +41,7 @@ void PreferencesDialog::loadPreferences()
     if (NULL != m_graphicsWidget)
     {
         ui->antialiasingCheckBox->setChecked(m_graphicsWidget->antialiased());
-        ui->canvasSizeSpinBox->setValue(m_graphicsWidget->width());
+        ui->canvasSizeSpinBox->setValue(m_graphicsWidget->boundingRect().width());
     }
 }
 
@@ -52,6 +52,6 @@ void PreferencesDialog::applyPreferences()
         m_graphicsWidget->setAntialiased(ui->antialiasingCheckBox->checkState() == Qt::Checked);
 
         const int newSize = ui->canvasSizeSpinBox->value();
-        m_graphicsWidget->setFixedSize(newSize, newSize);
+        m_graphicsWidget->resize(newSize);
     }
 }

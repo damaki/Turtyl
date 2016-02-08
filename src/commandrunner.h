@@ -38,9 +38,9 @@ class CommandRunner : public QThread
     Q_OBJECT
 
 public:
-    CommandRunner(TurtleGraphicsWidget* graphicsWidget);
+    CommandRunner(TurtleGraphicsItem* graphicsWidget);
 
-    TurtleGraphicsWidget* graphicsWidget() const;
+    TurtleGraphicsItem* graphicsWidget() const;
 
     void requestThreadStop();
 
@@ -64,7 +64,7 @@ protected:
 
 private:
     lua_State* m_state;
-    TurtleGraphicsWidget* m_graphicsWidget;
+    TurtleGraphicsItem* m_graphicsWidget;
 
     mutable QMutex m_luaMutex; // locked while a script is running
 
