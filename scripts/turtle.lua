@@ -132,6 +132,16 @@ function Turtle:arc(angle, xradius, yradius)
     end
 end
 
+function Turtle:setpos(x,y)
+    local pos = {x=x, y=y}
+
+    if self.snapenabled then
+        self.position = snapposition(pos)
+    else
+        self.position = pos
+    end
+end
+
 local turtle = Turtle.new()
 
 -------------------------------------------------------------------------------
@@ -151,6 +161,22 @@ end
 
 function rt(degrees)
     turtle:right(degrees)
+end
+
+function setpos(x, y)
+    turtle:setpos(x,y)
+end
+
+function pos()
+    return turtle.position.x, turtle.position.y
+end
+
+function setorientation(degrees)
+    turtle.heading = math.rad(degrees)
+end
+
+function orientation()
+    return math.deg(turtle.heading)
 end
 
 function arc(degrees, xradius, yradius)
