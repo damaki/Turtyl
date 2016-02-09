@@ -11,6 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = turtyl
 TEMPLATE = app
 
+CONFIG += static
+
 VERSION = 0.1.0
 
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
