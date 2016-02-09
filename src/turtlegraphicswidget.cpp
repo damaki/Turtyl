@@ -57,6 +57,12 @@ void TurtleGraphicsItem::setAntialiased(const bool on)
     m_antialiased = on;
 }
 
+QColor TurtleGraphicsItem::backgroundColor() const
+{
+    QMutexLocker lock(&m_mutex);
+    return m_backgroundColor;
+}
+
 /**
  * @brief Set the canvas background color.
  *

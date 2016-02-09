@@ -95,6 +95,7 @@ public:
     bool antialiased() const;
     void setAntialiased(bool on = true);
 
+    QColor backgroundColor() const;
     void setBackgroundColor(const QColor& color);
 
     void clear();

@@ -22,8 +22,8 @@
 #include <cassert>
 #include <QPen>
 
-static const int DRAW_LINE_ARGS_COUNT = 8;
-static const int DRAW_ARC_ARGS_COUNT = 10;
+static const int DRAW_LINE_ARGS_COUNT = 9;
+static const int DRAW_ARC_ARGS_COUNT = 11;
 static const int SET_BACKGROUND_COLOR_ARGS_COUNT = 3;
 
 static const char* LUA_PARENT_NAME = "_turtyl_parent";
@@ -71,6 +71,31 @@ static lua_Number getNumber(lua_State* state, int stackPos, const char* funcName
 }
 
 /**
+ * @brief Return a QColor from real RGBA components.
+ *
+ * If any of the RGBA components are outside the range [0,255] then
+ * they are clipped to the valid range. E.g. the value 300 is clipped
+ * to 255 and -10 is clipped to 0.
+ *
+ * The qreal values are rounded to the nearest integer value during
+ * the conversion.
+ *
+ * @param r
+ * @param g
+ * @param b
+ * @param a
+ * @return
+ */
+static QColor clippedColor(qreal r, qreal g, qreal b, qreal a)
+{
+    // Add 0.5 to round to the nearest integer color value.
+    return QColor(static_cast<int>(std::min(255.0, std::max(0.0, r + 0.5))),
+                  static_cast<int>(std::min(255.0, std::max(0.0, g + 0.5))),
+                  static_cast<int>(std::min(255.0, std::max(0.0, b + 0.5))),
+                  static_cast<int>(std::min(255.0, std::max(0.0, a + 0.5))));
+}
+
+/**
  * @brief Lua debug hook.
  *
  * This hook is used to pause/resume, and halt the current script.
@@ -113,6 +138,7 @@ void setupCommands(lua_State* state, CommandRunner* parent)
     lua_register(state, "draw_arc",  &drawArc);
     lua_register(state, "clear", &clear);
     lua_register(state, "set_background_color", &setBackgroundColor);
+    lua_register(state, "get_background_color", &getBackgroundColor);
 }
 
 /**
@@ -137,7 +163,7 @@ int drawLine(lua_State* state)
 {
     lua_Number x1,y1;
     lua_Number x2,y2;
-    lua_Number r,g,b;
+    lua_Number r,g,b,a;
     lua_Number size;
 
     // Check number of arguments
@@ -154,21 +180,15 @@ int drawLine(lua_State* state)
     r    = getNumber(state, 5, "draw_line()");
     g    = getNumber(state, 6, "draw_line()");
     b    = getNumber(state, 7, "draw_line()");
-    size = getNumber(state, 8, "draw_line()");
+    a    = getNumber(state, 8, "draw_line()");
+    size = getNumber(state, 9, "draw_line()");
 
     // The bottom-left of the screen as it appears to the user is (0,0)
     // In Qt the top-left is (0,0) so the coordinates from the script are flipped
     QLineF line(x1, -y1,
                 x2, -y2);
 
-    r = std::min(255.0, std::max(0.0, r));
-    g = std::min(255.0, std::max(0.0, g));
-    b = std::min(255.0, std::max(0.0, b));
-    QColor color(static_cast<int>(r),
-                 static_cast<int>(g),
-                 static_cast<int>(b));
-
-    QPen pen(QBrush(color), size);
+    QPen pen(clippedColor(r,g,b,a), size);
 
     getParent(state).graphicsWidget()->drawLine(line, pen);
 
@@ -185,9 +205,10 @@ int drawLine(lua_State* state)
  *   4. The arc's span angle.
  *   5. The arc's X radius
  *   6. The arc's Y radius
- *   7. The R component of the arc's RGB color.
- *   8. The G component of the arc's RGB color.
- *   9. The B component of the arc's RGB color.
+ *   7. The R component of the arc's RGBA color.
+ *   8. The G component of the arc's RGBA color.
+ *   9. The B component of the arc's RGBA color.
+ *   10. The A component of the arc's RGBA color.
  *   10. The thickness of the arc.
  *
  * @note If an error occurs then @c lua_error is called and this function does not return.
@@ -202,7 +223,7 @@ int drawArc(lua_State* state)
     lua_Number angle;
     lua_Number xradius;
     lua_Number yradius;
-    lua_Number r,g,b;
+    lua_Number r,g,b,a;
     lua_Number size;
 
     // Check number of arguments
@@ -221,20 +242,14 @@ int drawArc(lua_State* state)
     r           = getNumber(state, 7,  "draw_arc()");
     g           = getNumber(state, 8,  "draw_arc()");
     b           = getNumber(state, 9,  "draw_arc()");
-    size        = getNumber(state, 10, "draw_arc()");
+    a           = getNumber(state, 10, "draw_arc()");
+    size        = getNumber(state, 11, "draw_arc()");
 
     // The bottom-left of the screen as it appears to the user is (0,0)
     // In Qt the top-left is (0,0) so the coordinates from the script are flipped
     QPoint arcCenterPos(centerx, -centery);
 
-    r = std::min(255.0, std::max(0.0, r));
-    g = std::min(255.0, std::max(0.0, g));
-    b = std::min(255.0, std::max(0.0, b));
-    QColor color(static_cast<int>(r),
-                 static_cast<int>(g),
-                 static_cast<int>(b));
-
-    QPen pen(QBrush(color), size);
+    QPen pen(clippedColor(r,g,b,a), size);
 
     getParent(state).graphicsWidget()->drawArc(arcCenterPos, startAngle, angle, xradius, yradius, pen);
 
@@ -271,14 +286,24 @@ int setBackgroundColor(lua_State* state)
     g = getNumber(state, 2, "set_background_color()");
     b = getNumber(state, 3, "set_background_color()");
 
-    r = std::min(255.0, std::max(0.0, r));
-    g = std::min(255.0, std::max(0.0, g));
-    b = std::min(255.0, std::max(0.0, b));
-    QColor color(static_cast<int>(r),
-                 static_cast<int>(g),
-                 static_cast<int>(b));
+    // Note: the background color is always opaque
+    QColor color(clippedColor(r,g,b,255.0));
 
     getParent(state).graphicsWidget()->setBackgroundColor(color);
 
     return 0;
+}
+
+int getBackgroundColor(lua_State* state)
+{
+    // Clear the stack
+    lua_pop(state, lua_gettop(state));
+
+    const QColor color = getParent(state).graphicsWidget()->backgroundColor();
+
+    lua_pushinteger(state, color.red());
+    lua_pushinteger(state, color.green());
+    lua_pushinteger(state, color.blue());
+
+    return 3;
 }

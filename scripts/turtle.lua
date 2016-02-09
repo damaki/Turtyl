@@ -20,44 +20,60 @@ local function snapposition(pos)
     return {x=snap(pos.x), y=snap(pos.y)}
 end
 
-local function parsecolor(r,g,b, funcname)
-    -- If only the 'r' parameter is given (the others are nil) then
-    -- 'r' is treated as a color table (containing RGB values).
-    if r ~= nil and g == nil and b == nil then
-        if r["r"] ~= nil and
-           r["g"] ~= nil and
-           r["b"] ~= nil then
-            return r.r, r.g, r.b
-        else
-            error("The color passed to " .. funcname .. "() must have 'r', 'g', and 'b' values")
+local function parsecolor(r,g,b,a)
+    local newcolor = {r=0, g=0, b=0, a=255}
+
+    if type(r) == "table" then
+        if r['r'] ~= nil then
+            newcolor.r = r.r
+        end
+        if r['g'] ~= nil then
+            newcolor.g = r.g
+        end
+        if r['b'] ~= nil then
+            newcolor.b = r.b
+        end
+        if r['a'] ~= nil then
+            newcolor.a = r.a
         end
 
     else
-       assert(g ~= nil and b ~= nil, "expected 3 number arguments to " .. funcname .. "()")
-
-       return r,g,b
+        if r ~= nil then
+            newcolor.r = r
+        end
+        if g ~= nil then
+            newcolor.g = g
+        end
+        if b ~= nil then
+            newcolor.b = b
+        end
+        if a ~= nil then
+            newcolor.a = a
+        end
     end
+
+    return newcolor
 end
 
 -------------------------------------------------------------------------------
 -- Standard colors
-white       = {r=255, g=255, b=255}
-black       = {r=0,   g=0,   b=0  }
-red         = {r=255, g=0,   b=0  }
-darkRed     = {r=128, g=0,   b=0  }
-green       = {r=0,   g=255, b=0  }
-darkGreen   = {r=0,   g=128, b=0  }
-blue        = {r=0,   g=0,   b=255}
-darkBlue    = {r=0,   g=0,   b=128}
-cyan        = {r=0,   g=255, b=255}
-darkCyan    = {r=0,   g=128, b=128}
-magenta     = {r=255, g=0,   b=255}
-darkMagenta = {r=128, g=0,   b=128}
-yellow      = {r=255, g=255, b=0  }
-darkYellow  = {r=128, g=128, b=0  }
-gray        = {r=160, g=160, b=164}
-darkGray    = {r=128, g=128, b=128}
-lightGray   = {r=192, g=192, b=192}
+white       = {r=255, g=255, b=255, a=255}
+black       = {r=0,   g=0,   b=0,   a=255}
+red         = {r=255, g=0,   b=0,   a=255}
+darkRed     = {r=128, g=0,   b=0,   a=255}
+green       = {r=0,   g=255, b=0,   a=255}
+darkGreen   = {r=0,   g=128, b=0,   a=255}
+blue        = {r=0,   g=0,   b=255, a=255}
+darkBlue    = {r=0,   g=0,   b=128, a=255}
+cyan        = {r=0,   g=255, b=255, a=255}
+darkCyan    = {r=0,   g=128, b=128, a=255}
+magenta     = {r=255, g=0,   b=255, a=255}
+darkMagenta = {r=128, g=0,   b=128, a=255}
+yellow      = {r=255, g=255, b=0,   a=255}
+darkYellow  = {r=128, g=128, b=0,   a=255}
+gray        = {r=160, g=160, b=164, a=255}
+darkGray    = {r=128, g=128, b=128, a=255}
+lightGray   = {r=192, g=192, b=192, a=255}
 
 -------------------------------------------------------------------------------
 -- Turtle class.
@@ -97,7 +113,7 @@ function Turtle:forward(distance)
     if self.pendown then
         draw_line(self.position.x, self.position.y,
                   endpos.x, endpos.y,
-                  self.pencolor.r, self.pencolor.g, self.pencolor.b,
+                  self.pencolor.r, self.pencolor.g, self.pencolor.b, self.pencolor.a,
                   self.thickness)
     end
 
@@ -127,7 +143,7 @@ function Turtle:arc(angle, xradius, yradius)
                  angle,
                  xradius,
                  yradius,
-                 self.pencolor.r, self.pencolor.g, self.pencolor.b,
+                 self.pencolor.r, self.pencolor.g, self.pencolor.b, self.pencolor.a,
                  self.thickness)
     end
 end
@@ -148,18 +164,22 @@ local turtle = Turtle.new()
 -- Standard Logo turtle commands
 
 function fd(distance)
+    assert(type(distance) == "number", "argument to fd() must be a number")
     turtle:forward(distance)
 end
 
 function bk(distance)
+assert(type(distance) == "number", "argument to bk() must be a number")
     turtle:backward(distance)
 end
 
 function lt(degrees)
+    assert(type(degrees) == "number", "argument to lt() must be a number")
     turtle:left(degrees)
 end
 
 function rt(degrees)
+assert(type(degrees) == "number", "argument to rt() must be a number")
     turtle:right(degrees)
 end
 
@@ -172,6 +192,7 @@ function pos()
 end
 
 function setorientation(degrees)
+    assert(type(degrees) == "number", "argument to setorientation() must be a number")
     turtle.heading = math.rad(degrees)
 end
 
@@ -180,6 +201,11 @@ function orientation()
 end
 
 function arc(degrees, xradius, yradius)
+    assert(type(degrees) == "number", "1st argument to arc() must be a number")
+    assert(type(xradius) == "number", "2nd argument to arc() must be a number")
+    assert(yradius == nil or type(yradius) == "number",
+           "3rd argument to arc() must be a number")
+
     turtle:arc(degrees, xradius, yradius)
 end
 
@@ -191,22 +217,30 @@ function pd()
     turtle.pendown = true
 end
 
-function setsize(size)
+function setpensize(size)
+    assert(type(size) == "number", "argument to setpensize() must be a number")
     turtle.thickness = size
 end
 
-function setpencolor(r,g,b)
-    assert(r ~= nil, "missing argument to setpencolor()")
+function pensize()
+    return turtle.thickness
+end
 
-    r,g,b = parsecolor(r,g,b,"setpencolor")
-    turtle.pencolor = {r=r, g=g, b=b}
+function setpencolor(r,g,b,a)
+    turtle.pencolor = parsecolor(r,g,b,a)
+end
+
+function pencolor()
+    return turtle.pencolor.r, turtle.pencolor.g, turtle.pencolor.b, turtle.pencolor.a
 end
 
 function setscreencolor(r,g,b)
-    assert(r ~= nil, "missing argument to setscreencolor()")
+    local newcolor = parsecolor(r,g,b)
+    set_background_color(newcolor.r, newcolor.g, newcolor.b)
+end
 
-    r,g,b = parsecolor(r,g,b,"setscreencolor")
-    set_background_color(r,g,b)
+function screencolor()
+    return get_background_color()
 end
 
 function home()
