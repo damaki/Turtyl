@@ -41,7 +41,7 @@ static const char* LUA_PARENT_NAME = "_turtyl_parent";
  * @param state The lua state.
  * @return The @c CommandRunner read from the lua state.
  */
-static CommandRunner& getParent(lua_State* state)
+static ScriptRunner& getParent(lua_State* state)
 {
     lua_getglobal(state, LUA_PARENT_NAME);
     void* rawparent = lua_touserdata(state, -1);
@@ -51,7 +51,7 @@ static CommandRunner& getParent(lua_State* state)
         lua_error(state);
     }
 
-    return *reinterpret_cast<CommandRunner*>(rawparent);
+    return *reinterpret_cast<ScriptRunner*>(rawparent);
 }
 
 static lua_Number getNumber(lua_State* state, int stackPos, const char* funcName)
@@ -102,11 +102,11 @@ static QColor clippedColor(qreal r, qreal g, qreal b, qreal a)
  */
 static void debugHook(lua_State* state, lua_Debug* )
 {
-    CommandRunner& parent = getParent(state);
+    ScriptRunner& parent = getParent(state);
 
     parent.checkPause();
 
-    if (parent.isHaltRequested())
+    if (parent.haltRequested())
     {
         // Stop the script
         lua_pushstring(state, "halted");
@@ -124,7 +124,7 @@ static void debugHook(lua_State* state, lua_Debug* )
  * @param[in,out] state The commands are registered to this lua state.
  * @param[in] scene The scene to associate with the lua state.
  */
-void setupCommands(lua_State* state, CommandRunner* parent)
+void setupCommands(lua_State* state, ScriptRunner* parent)
 {
     if (NULL != parent)
     {

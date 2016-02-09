@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     m_scene(new QGraphicsScene),
-    m_turtleGraphics(new TurtleGraphicsItem),
+    m_turtleGraphics(new TurtleGraphicsCanvasItem),
     m_cmds(m_turtleGraphics),
     m_prefsDialog(new PreferencesDialog(m_turtleGraphics, this)),
     m_helpDialog(new HelpDialog(this))
@@ -142,7 +142,7 @@ void MainWindow::pauseCommand()
     ui->pauseButton->setEnabled(false);
     ui->resumeButton->setEnabled(true);
 
-    m_cmds.requestCommandPause();
+    m_cmds.pauseScript();
 }
 
 /**
@@ -153,7 +153,7 @@ void MainWindow::resumeCommand()
     ui->pauseButton->setEnabled(true);
     ui->resumeButton->setEnabled(false);
 
-    m_cmds.requestCommandResume();
+    m_cmds.resumeScript();
 }
 
 /**
@@ -166,7 +166,7 @@ void MainWindow::haltCommand()
     ui->pauseButton->setEnabled(false);
     ui->resumeButton->setEnabled(false);
 
-    m_cmds.requestCommandHalt();
+    m_cmds.haltScript();
 }
 
 /**

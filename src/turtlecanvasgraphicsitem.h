@@ -25,7 +25,7 @@
 #include <QPixmap>
 
 /**
- * @brief Manages real-time drawing & rendering of turtle graphics operations.
+ * @brief Canvas for real-time drawing & rendering of turtle graphics.
  *
  * The following methods in this class can be safely called by concurrently by a
  * background thread (i.e. the thread running the Lua scripts):
@@ -84,13 +84,13 @@
  * Similarly, if the canvas size is increased then extra space is added at the
  * edges of the canvas.
  */
-class TurtleGraphicsItem : public QObject, public QGraphicsItem
+class TurtleCanvasGraphicsItem : public QObject, public QGraphicsItem
 {
     Q_OBJECT
     Q_INTERFACES(QGraphicsItem)
 
 public:
-    TurtleGraphicsItem();
+    TurtleCanvasGraphicsItem();
 
     bool antialiased() const;
     void setAntialiased(bool on = true);

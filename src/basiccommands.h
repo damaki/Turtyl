@@ -22,9 +22,9 @@
 
 #include "lua.hpp"
 
-class CommandRunner;
+class ScriptRunner;
 
-void setupCommands(lua_State* state, CommandRunner* parent);
+void setupCommands(lua_State* state, ScriptRunner* parent);
 
 int drawLine(lua_State* state);
 int drawArc(lua_State* state);

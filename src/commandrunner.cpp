@@ -22,7 +22,7 @@
 #include <QMutexLocker>
 #include <cassert>
 
-CommandRunner::CommandRunner(TurtleGraphicsItem* const graphicsWidget) :
+ScriptRunner::ScriptRunner(TurtleGraphicsCanvasItem* const graphicsWidget) :
     m_state(luaL_newstate()),
     m_graphicsWidget(graphicsWidget),
     m_scriptDataSema(),
@@ -52,7 +52,7 @@ CommandRunner::CommandRunner(TurtleGraphicsItem* const graphicsWidget) :
     setupCommands(m_state, this);
 }
 
-TurtleGraphicsItem* CommandRunner::graphicsWidget() const
+TurtleGraphicsCanvasItem* ScriptRunner::graphicsWidget() const
 {
     return m_graphicsWidget;
 }
@@ -63,17 +63,17 @@ TurtleGraphicsItem* CommandRunner::graphicsWidget() const
  * If any commands are currently being executed by the thread then the current command
  * is halted.
  */
-void CommandRunner::requestThreadStop()
+void ScriptRunner::requestThreadStop()
 {
     requestInterruption();
-    requestCommandHalt();
+    haltScript();
     m_scriptDataSema.release(); // wake up the thread (if it's sleeping)
 }
 
 /**
  * @brief Send a request to pause the execution of a currently running command.
  */
-void CommandRunner::requestCommandPause()
+void ScriptRunner::pauseScript()
 {
     QMutexLocker lock(&m_pauseMutex);
     m_pause = true;
@@ -82,7 +82,7 @@ void CommandRunner::requestCommandPause()
 /**
  * @brief Send a request to resume the execution of a previously paused command.
  */
-void CommandRunner::requestCommandResume()
+void ScriptRunner::resumeScript()
 {
     QMutexLocker lock(&m_pauseMutex);
     if (m_pause)
@@ -95,7 +95,7 @@ void CommandRunner::requestCommandResume()
 /**
  * @brief Send a request to halt/abort the execution of the current command(s).
  */
-void CommandRunner::requestCommandHalt()
+void ScriptRunner::haltScript()
 {
     {
         QMutexLocker lock(&m_haltMutex);
@@ -103,7 +103,7 @@ void CommandRunner::requestCommandHalt()
     }
 
     // The command might currently be paused.
-    requestCommandResume();
+    resumeScript();
 }
 
 /**
@@ -113,7 +113,7 @@ void CommandRunner::requestCommandHalt()
  *
  * @param[in] command String containing the Lua code to execute.
  */
-void CommandRunner::runCommand(const QString& command)
+void ScriptRunner::runCommand(const QString& command)
 {
     {
         QMutexLocker lock(&m_pauseMutex);
@@ -141,7 +141,7 @@ void CommandRunner::runCommand(const QString& command)
  *
  * @param filename The name of the file to load and run.
  */
-void CommandRunner::runScriptFile(const QString& filename)
+void ScriptRunner::runScriptFile(const QString& filename)
 {
     QMutexLocker lock(&m_luaMutex);
     bool success = false;
@@ -156,17 +156,17 @@ void CommandRunner::runScriptFile(const QString& filename)
 
     if (success)
     {
-        emit commandFinished(false);
+        emit scriptFinished(false);
     }
     else
     {
         const char* errmsg = lua_tostring(m_state, -1);
         if (NULL != errmsg)
         {
-            emit commandError(QString(errmsg));
+            emit scriptError(QString(errmsg));
         }
 
-        emit commandFinished(true);
+        emit scriptFinished(true);
     }
 }
 
@@ -179,7 +179,7 @@ void CommandRunner::runScriptFile(const QString& filename)
  * @see requestCommandPause()
  * @see requestCommandResume()
  */
-void CommandRunner::checkPause()
+void ScriptRunner::checkPause()
 {
     QMutexLocker lock(&m_pauseMutex);
     while (m_pause)
@@ -194,18 +194,18 @@ void CommandRunner::checkPause()
  * @see requestCommandHalt()
  * @return Returns @c true if the script should halt. @c false otherwise.
  */
-bool CommandRunner::isHaltRequested() const
+bool ScriptRunner::haltRequested() const
 {
     QMutexLocker lock(&m_haltMutex);
     return m_halt;
 }
 
-void CommandRunner::printMessage(const QString& message)
+void ScriptRunner::printMessage(const QString& message)
 {
-    emit commandMessage(message);
+    emit scriptMessage(message);
 }
 
-void CommandRunner::run()
+void ScriptRunner::run()
 {
     QString scriptData;
     bool hasScriptData;
@@ -250,17 +250,17 @@ void CommandRunner::run()
 
             if (success)
             {
-                emit commandFinished(false);
+                emit scriptFinished(false);
             }
             else
             {
                 const char* errmsg = lua_tostring(m_state, -1);
                 if (NULL != errmsg)
                 {
-                    emit commandError(QString(errmsg));
+                    emit scriptError(QString(errmsg));
                 }
 
-                emit commandFinished(true);
+                emit scriptFinished(true);
             }
         }
     }

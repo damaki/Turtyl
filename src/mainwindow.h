@@ -46,13 +46,15 @@ protected:
     virtual void closeEvent(QCloseEvent *event);
 
 private slots:
-    void runCommand();
+    void runScript();
+
     void showScriptError(const QString& message);
     void showScriptOutput(const QString& message);
-    void commandFinished(bool hasErrors);
-    void pauseCommand();
-    void resumeCommand();
-    void haltCommand();
+    void scriptFinished(bool hasErrors);
+
+    void pauseScript();
+    void resumeScript();
+    void haltScript();
 
     void resizeGraphicsScene();
 
@@ -60,8 +62,8 @@ private:
     Ui::MainWindow *ui;
 
     QGraphicsScene* m_scene;
-    TurtleGraphicsItem* m_turtleGraphics;
-    CommandRunner m_cmds;
+    TurtleGraphicsCanvasItem* m_turtleGraphics;
+    ScriptRunner m_cmds;
 
     PreferencesDialog* m_prefsDialog;
     HelpDialog* m_helpDialog;

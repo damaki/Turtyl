@@ -23,14 +23,14 @@ SOURCES += src/main.cpp\
     src/basiccommands.cpp \
     src/preferencesdialog.cpp \
     src/helpdialog.cpp \
-    src/turtlegraphicswidget.cpp
+    src/turtlecanvasgraphicsitem.cpp
 
 HEADERS  += src/mainwindow.h \
     src/commandrunner.h \
     src/basiccommands.h \
     src/preferencesdialog.h \
     src/helpdialog.h \
-    src/turtlegraphicswidget.h
+    src/turtlecanvasgraphicsitem.h
 
 FORMS    += forms/mainwindow.ui \
     forms/preferencesdialog.ui \

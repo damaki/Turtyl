@@ -27,7 +27,7 @@
 
 static const int DEFAULT_SIZE = 2048;
 
-TurtleGraphicsItem::TurtleGraphicsItem() :
+TurtleGraphicsCanvasItem::TurtleGraphicsCanvasItem() :
     m_mutex(),
     m_pixmap(DEFAULT_SIZE, DEFAULT_SIZE),
     m_backgroundColor(Qt::white),
@@ -45,19 +45,19 @@ TurtleGraphicsItem::TurtleGraphicsItem() :
     setPos(-newpos, -newpos);
 }
 
-bool TurtleGraphicsItem::antialiased() const
+bool TurtleGraphicsCanvasItem::antialiased() const
 {
     QMutexLocker lock(&m_mutex);
     return m_antialiased;
 }
 
-void TurtleGraphicsItem::setAntialiased(const bool on)
+void TurtleGraphicsCanvasItem::setAntialiased(const bool on)
 {
     QMutexLocker lock(&m_mutex);
     m_antialiased = on;
 }
 
-QColor TurtleGraphicsItem::backgroundColor() const
+QColor TurtleGraphicsCanvasItem::backgroundColor() const
 {
     QMutexLocker lock(&m_mutex);
     return m_backgroundColor;
@@ -71,7 +71,7 @@ QColor TurtleGraphicsItem::backgroundColor() const
  *
  * @param color The new background color.
  */
-void TurtleGraphicsItem::setBackgroundColor(const QColor& color)
+void TurtleGraphicsCanvasItem::setBackgroundColor(const QColor& color)
 {
     {
         QMutexLocker lock(&m_mutex);
@@ -86,7 +86,7 @@ void TurtleGraphicsItem::setBackgroundColor(const QColor& color)
  *
  * The canvasUpdated() signal is emitted after the canvas is cleared.
  */
-void TurtleGraphicsItem::clear()
+void TurtleGraphicsCanvasItem::clear()
 {
     {
         QMutexLocker lock(&m_mutex);
@@ -104,7 +104,7 @@ void TurtleGraphicsItem::clear()
  * @param[in] line The line to draw.
  * @param[in] pen The pen to use for drawing the line.
  */
-void TurtleGraphicsItem::drawLine(const QLineF &line, const QPen &pen)
+void TurtleGraphicsCanvasItem::drawLine(const QLineF &line, const QPen &pen)
 {
     {
         QMutexLocker lock(&m_mutex);
@@ -178,7 +178,7 @@ void TurtleGraphicsItem::drawLine(const QLineF &line, const QPen &pen)
  * @param radius The radius of the arc.
  * @param pen The pen to use for drawing the arc.
  */
-void TurtleGraphicsItem::drawArc(const QPointF &centerPos,
+void TurtleGraphicsCanvasItem::drawArc(const QPointF &centerPos,
                                    qreal startAngle,
                                    qreal angle,
                                    qreal xradius,
@@ -230,7 +230,7 @@ void TurtleGraphicsItem::drawArc(const QPointF &centerPos,
  *
  * @return The canvas size.
  */
-int TurtleGraphicsItem::size() const
+int TurtleGraphicsCanvasItem::size() const
 {
     QMutexLocker lock(&m_mutex);
     return m_pixmap.width();
@@ -244,7 +244,7 @@ int TurtleGraphicsItem::size() const
  * @param newSize The size (in pixels) of the new canvas. If the size is the same
  *     as the current size then this method has no effect.
  */
-void TurtleGraphicsItem::resize(int newSize)
+void TurtleGraphicsCanvasItem::resize(int newSize)
 {
     bool wasResized = false;
 
@@ -293,12 +293,12 @@ void TurtleGraphicsItem::resize(int newSize)
     }
 }
 
-QRectF TurtleGraphicsItem::boundingRect() const
+QRectF TurtleGraphicsCanvasItem::boundingRect() const
 {
     return m_pixmap.rect();
 }
 
-void TurtleGraphicsItem::paint(QPainter *painter,
+void TurtleGraphicsCanvasItem::paint(QPainter *painter,
                                const QStyleOptionGraphicsItem *,
                                QWidget *)
 {
@@ -313,7 +313,7 @@ void TurtleGraphicsItem::paint(QPainter *painter,
  * The purpose of this method is to allow update() to be indirectly called
  * by the UI thread by a queued signal.
  */
-void TurtleGraphicsItem::callUpdate()
+void TurtleGraphicsCanvasItem::callUpdate()
 {
     update();
 }

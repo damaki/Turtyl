@@ -33,41 +33,41 @@
  * Errors produced when either loading/compiling or running a script
  * produce an error message via the @c commandError() signal.
  */
-class CommandRunner : public QThread
+class ScriptRunner : public QThread
 {
     Q_OBJECT
 
 public:
-    CommandRunner(TurtleGraphicsItem* graphicsWidget);
+    ScriptRunner(TurtleGraphicsCanvasItem* graphicsWidget);
 
-    TurtleGraphicsItem* graphicsWidget() const;
+    TurtleGraphicsCanvasItem* graphicsWidget() const;
 
     void requestThreadStop();
 
-    void requestCommandPause();
-    void requestCommandResume();
-    void requestCommandHalt();
+    void pauseScript();
+    void resumeScript();
+    void haltScript();
 
     void runCommand(const QString& command);
 
     void runScriptFile(const QString& filename);
 
     void checkPause();
-    bool isHaltRequested() const;
+    bool haltRequested() const;
     void printMessage(const QString& message);
 
 signals:
-    void commandFinished(bool hasErrors);
-    void commandError(const QString& message);
+    void scriptFinished(bool hasErrors);
+    void scriptError(const QString& message);
 
-    void commandMessage(const QString& message);
+    void scriptMessage(const QString& message);
 
 protected:
     virtual void run();
 
 private:
     lua_State* m_state;
-    TurtleGraphicsItem* m_graphicsWidget;
+    TurtleGraphicsCanvasItem* m_graphicsWidget;
 
     mutable QMutex m_luaMutex; // locked while a script is running
 

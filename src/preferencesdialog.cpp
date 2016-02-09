@@ -20,7 +20,7 @@
 #include "preferencesdialog.h"
 #include "ui_preferencesdialog.h"
 
-PreferencesDialog::PreferencesDialog(TurtleGraphicsItem* const graphicsWidget,
+PreferencesDialog::PreferencesDialog(TurtleGraphicsCanvasItem* const graphicsWidget,
                                      QWidget* const parent) :
     QDialog(parent),
     ui(new Ui::PreferencesDialog),
