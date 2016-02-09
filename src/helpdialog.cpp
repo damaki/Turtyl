@@ -28,16 +28,73 @@ HelpDialog::HelpDialog(QWidget *parent) :
 
     // Make background transparent
     ui->descriptionTextEdit->viewport()->setAutoFillBackground(false);
+    ui->titleTextBrowser->viewport()->setAutoFillBackground(false);
 
-    // Fill in information
+    // Fill in details in the title
+    QString title = ui->titleTextBrowser->document()->toHtml();
+    fillProgramDetails(title);
+    ui->titleTextBrowser->document()->setHtml(title);
+
+    // Fill in information in the description
     QString description = ui->descriptionTextEdit->document()->toHtml();
-    description.replace("$APP_VERSION", APP_VERSION)
-            .replace("$QT_VERSION", QT_VERSION_STR)
-            .replace("$BUILD_TIME", __DATE__ " " __TIME__);
+    fillProgramDetails(description);
     ui->descriptionTextEdit->document()->setHtml(description);
+
+    // License boxes are hidden by default
+    ui->licenseTextEdit->setVisible(false);
+    ui->qtDescriptionTextEdit->setVisible(false);
+
+    connect(ui->licenseButton, SIGNAL(clicked(bool)),
+            this, SLOT(licenseClicked(bool)));
+    connect(ui->qtButton, SIGNAL(clicked(bool)),
+            this, SLOT(aboutQtClicked(bool)));
 }
 
 HelpDialog::~HelpDialog()
 {
     delete ui;
+}
+
+void HelpDialog::licenseClicked(bool checked)
+{
+    if (checked)
+    {
+        ui->descriptionTextEdit->hide();
+        ui->qtDescriptionTextEdit->hide();
+        ui->licenseTextEdit->show();
+
+        ui->qtButton->setChecked(false);
+    }
+    else
+    {
+        ui->qtDescriptionTextEdit->hide();
+        ui->licenseTextEdit->hide();
+        ui->descriptionTextEdit->show();
+    }
+}
+
+void HelpDialog::aboutQtClicked(bool checked)
+{
+    if (checked)
+    {
+        ui->descriptionTextEdit->hide();
+        ui->licenseTextEdit->hide();
+        ui->qtDescriptionTextEdit->show();
+
+        ui->licenseButton->setChecked(false);
+    }
+    else
+    {
+        ui->licenseTextEdit->hide();
+        ui->qtDescriptionTextEdit->hide();
+        ui->descriptionTextEdit->show();
+    }
+}
+
+void HelpDialog::fillProgramDetails(QString& string)
+{
+    string.replace("$APP_VERSION", APP_VERSION)
+            .replace("$QT_VERSION", QT_VERSION_STR)
+            .replace("$BUILD_DATE", __DATE__)
+            .replace("$BUILD_TIME", __TIME__);
 }

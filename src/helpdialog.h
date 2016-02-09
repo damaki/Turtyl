@@ -35,7 +35,13 @@ public:
     explicit HelpDialog(QWidget *parent = 0);
     ~HelpDialog();
 
+private slots:
+    void licenseClicked(bool checked);
+    void aboutQtClicked(bool checked);
+
 private:
+    static void fillProgramDetails(QString& string);
+
     Ui::HelpDialog *ui;
 };
 
