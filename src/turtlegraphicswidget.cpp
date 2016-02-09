@@ -111,27 +111,72 @@ void TurtleGraphicsItem::drawLine(const QLineF &line, const QPen &pen)
         // Translate the origin from the user's perspective (center of the drawing area)
         // to QPixmap's origin (top-left of the pixmap).
         painter.drawLine(line.translated(static_cast<qreal>(m_pixmap.width())  / 2.0,
-                                           static_cast<qreal>(m_pixmap.height()) / 2.0));
+                                         static_cast<qreal>(m_pixmap.height()) / 2.0));
     }
 
     emit canvasUpdated();
 }
 
 /**
- * @brief Draws a circular arc.
+ * @brief Draws an elliptical arc around a point.
  *
  * The canvasUpdated() signal is emitted after the arc is drawn.
  *
- * @param startPos The position of the arc's center.
- * @param startAngle The starting angle of the arc. 0 degrees is aiming straight up.
- * @param angle The angle of the arc (positive values turn clockwise).
+ * The coordinate system for drawArc()'s angles are as follows:
+ *
+ * @code
+ *             (0 deg)
+ *                 |
+ *                 |
+ *                 |
+ *(+270 deg) ------+------ (+90 deg)
+ *                 |
+ *                 |
+ *                 |
+ *            (+180 deg)
+ * @endcode
+ *
+ * An arc of 90 degrees will span clockwise as follows:
+ *
+ * @code
+ *      +-_
+ *      |  '-.
+ *      |     \
+ *      |      |
+ *------+------+
+ *      |
+ *      |
+ *      |
+ * @endcode
+ *
+ * Negative angles span counter-clockwise. For example, an arc of -90 degrees:
+ * @code
+ *      _-+
+ *   .-'  |
+ *  /     |
+ * |      |
+ * +------+------
+ *        |
+ *        |
+ *        |
+ * @endcode
+ *
+ * The arc is drawn with (possibly different) X and Y radiuses, which permits
+ * drawing ellipses.
+ *
+ * The @p startAngle parameter controls the rotation of the entire arc.
+ *
+ * @param centerPos The position of the arc's center on the canvas.
+ * @param startAngle The starting angle (degrees) of the arc. 0 degrees is aiming straight up.
+ * @param angle The angle (degrees) of the arc (positive values turn clockwise).
  * @param radius The radius of the arc.
  * @param pen The pen to use for drawing the arc.
  */
-void TurtleGraphicsItem::drawArc(const QPointF &startPos,
+void TurtleGraphicsItem::drawArc(const QPointF &centerPos,
                                    qreal startAngle,
                                    qreal angle,
-                                   qreal radius,
+                                   qreal xradius,
+                                   qreal yradius,
                                    const QPen &pen)
 {
     {
@@ -142,28 +187,33 @@ void TurtleGraphicsItem::drawArc(const QPointF &startPos,
 
         painter.setPen(pen);
 
-        QRectF boundingBox(startPos.x() - radius,
-                           startPos.y() - radius,
-                           radius * 2.0,
-                           radius * 2.0);
-
-        // Translate the origin from the user's perspective (center of the drawing area)
-        // to QPixmap's origin (top-left of the pixmap).
-        boundingBox.translate(static_cast<qreal>(m_pixmap.width())  / 2.0,
-                              static_cast<qreal>(m_pixmap.height()) / 2.0);
+        // Bounding box centered around the origin.
+        // This permits rotating the drawing around the origing, based on startAngle.
+        QRectF boundingBox(-xradius,
+                           -yradius,
+                           xradius * 2.0,
+                           yradius * 2.0);
 
         // From the user's point of view arcs are drawn clockwise, but Qt draws them
         // counter-clockwise.
-        angle      = -angle;
-
-        // There's a difference of 90 degrees from the user's point of view and Qt
-        startAngle += 90.0;
+        angle = -angle;
 
         // Angles given to drawArc() are integers representing 1/16th a degree.
-        const int startAngleInt = static_cast<int>(startAngle * 16.0);
         const int angleInt      = static_cast<int>(angle * 16.0);
 
-        painter.drawArc(boundingBox, startAngleInt, angleInt);
+        // Translate the origin from the user's perspective (center of the drawing area)
+        // to QPixmap's origin (top-left of the pixmap).
+        painter.translate(static_cast<qreal>(m_pixmap.width())  / 2.0,
+                          static_cast<qreal>(m_pixmap.height()) / 2.0);
+
+        // Translate from the origin to the final position.
+        painter.translate(centerPos.x(), centerPos.y());
+
+        // Rotate the entire arc about its center point,
+        // also adjust for the 90 degree difference in the coordinate systems.
+        painter.rotate(startAngle - 90.0);
+
+        painter.drawArc(boundingBox, 0, angleInt);
     }
 
     emit canvasUpdated();

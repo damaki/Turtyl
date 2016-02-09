@@ -116,12 +116,17 @@ function Turtle:left(degrees)
     self:right(-degrees)
 end
 
-function Turtle:arc(radius, angle)
+function Turtle:arc(angle, xradius, yradius)
     if self.pendown then
+        if yradius == nil then
+            yradius = xradius
+        end
+
         draw_arc(self.position.x, self.position.y,
                  math.deg(self.heading),
                  angle,
-                 radius,
+                 xradius,
+                 yradius,
                  self.pencolor.r, self.pencolor.g, self.pencolor.b,
                  self.thickness)
     end
@@ -148,8 +153,8 @@ function rt(degrees)
     turtle:right(degrees)
 end
 
-function arc(radius, degrees)
-    turtle:arc(radius, degrees)
+function arc(degrees, xradius, yradius)
+    turtle:arc(degrees, xradius, yradius)
 end
 
 function pu()
@@ -193,7 +198,7 @@ function circle(radius)
     if ispendown then
         pd()
     end
-    arc(radius, 360)
+    arc(360, radius)
     pu()
     bk(radius)
     lt(90)

@@ -35,6 +35,54 @@
  *    * drawArc()
  *
  * Other methods can only be called by the UI thread.
+ *
+ * @section Coordinate System
+ *
+ * The coordinate system used by this class is different to the rest of the Qt framework.
+ * In this class, the origin (0,0) is at the center of the canvas, with the X coordinate
+ * increasing as the pen moves @em right on the canvas, and the Y coordinate increasing
+ * as the pen moves @em up the canvas. The (x,y) coordinates on an example 10x10 canvas
+ * is shown below:
+ *
+ * @code
+ *             width = 10
+ * |<------------------------------->|
+ *
+ *  (-5,5)           (0,5)            (5,5)
+ * +----------------+----------------+      ---
+ * |                |                |       ^
+ * |                |                |       |
+ * |                |                |       |
+ * |                |                |       |
+ * |                |                |       |
+ * |                |                |       |
+ * |                |                |       |
+ * |(-5,0)          |(0,0)           |(5,0)  |
+ * +----------------+----------------+       | height = 10
+ * |                |                |       |
+ * |                |                |       |
+ * |                |                |       |
+ * |                |                |       |
+ * |                |                |       |
+ * |                |                |       |
+ * |                |                |       |
+ * |(-5,-5)         |(0,-5)          |(5,-5) v
+ * +----------------+----------------+      ---
+ * @endcode
+ *
+ * All drawing operations (e.g. drawLine()) use the above coordinate system.
+ *
+ * @subsection Resizing the canvas
+ * The canvas size can be changed at any time by calling resize(), which will
+ * change the width and height of the canvas to the new size (note that the
+ * canvas is always square).
+ *
+ * When the canvas is resized its width and height are updated relative to the
+ * origin at (0,0). If the canvas size is reduced then drawings at the edge of
+ * the canvas are erased. The drawings at the origin are unaffected.
+ *
+ * Similarly, if the canvas size is increased then extra space is added at the
+ * edges of the canvas.
  */
 class TurtleGraphicsItem : public QObject, public QGraphicsItem
 {
@@ -53,10 +101,11 @@ public:
 
     void drawLine(const QLineF& line, const QPen& pen);
 
-    void drawArc(const QPointF& startPos,
+    void drawArc(const QPointF& centerPos,
                  qreal startAngle,
                  qreal angle,
-                 qreal radius,
+                 qreal xradius,
+                 qreal yradius,
                  const QPen& pen);
 
     int size() const;
