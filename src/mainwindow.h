@@ -47,8 +47,9 @@ protected:
 
 private slots:
     void runCommand();
-    void handleError(const QString& message);
-    void commandFinished();
+    void showScriptError(const QString& message);
+    void showScriptOutput(const QString& message);
+    void commandFinished(bool hasErrors);
     void pauseCommand();
     void resumeCommand();
     void haltCommand();

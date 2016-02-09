@@ -35,14 +35,19 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->graphicsView->setScene(m_scene);
     m_scene->addItem(m_turtleGraphics);
-
+    ui->graphicsView->setScene(m_scene);
     ui->graphicsView->centerOn(0.0, 0.0);
 
+    ui->errorMessagesTextEdit->setTextColor(Qt::red);
+
+    // These buttons are only enabled while a script is running.
     ui->haltButton->setEnabled(false);
     ui->pauseButton->setEnabled(false);
     ui->resumeButton->setEnabled(false);
+
+    // Messages dock is hidden by default.
+    ui->messagesDockWidget->hide();
 
     connect(m_turtleGraphics, SIGNAL(canvasResized()), this, SLOT(resizeGraphicsScene()));
 
@@ -56,17 +61,24 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->action_About,       SIGNAL(triggered()), m_helpDialog,  SLOT(show()));
 
     connect(&m_cmds, SIGNAL(commandError(QString)),
-            this,    SLOT(handleError(QString)),
+            this,    SLOT(showScriptError(QString)),
             Qt::QueuedConnection);
 
-    connect(&m_cmds, SIGNAL(commandFinished()),
-            this,    SLOT(commandFinished()),
+    connect(&m_cmds, SIGNAL(commandMessage(QString)),
+            this,    SLOT(showScriptOutput(QString)),
             Qt::QueuedConnection);
 
     m_cmds.start();
 
     //TODO: Make startup scripts configurable.
+    m_cmds.runScriptFile("print.lua");
     m_cmds.runScriptFile("turtle.lua");
+
+    // Don't connect this until all the startup scripts have run
+    // to prevent the error messages box from being cleared by successful scripts.
+    connect(&m_cmds, SIGNAL(commandFinished(bool)),
+            this,    SLOT(commandFinished(bool)),
+            Qt::QueuedConnection);
 }
 
 MainWindow::~MainWindow()
@@ -83,6 +95,8 @@ void MainWindow::closeEvent(QCloseEvent *)
 
 void MainWindow::runCommand()
 {
+    ui->errorMessagesTextEdit->clear();
+
     m_cmds.runCommand(ui->cmdEdit->document()->toPlainText());
 
     ui->runButton->setEnabled(false);
@@ -90,10 +104,16 @@ void MainWindow::runCommand()
     ui->pauseButton->setEnabled(true);
 }
 
-void MainWindow::handleError(const QString& message)
+void MainWindow::showScriptError(const QString& message)
 {
-    //TODO: Display error messages in the GUI
-    std::cerr << message.toStdString() << std::endl;
+    ui->errorMessagesTextEdit->append(message);
+    ui->messagesDockWidget->show();
+    ui->messagesTabWidget->setCurrentWidget(ui->errorsTab);
+}
+
+void MainWindow::showScriptOutput(const QString& message)
+{
+    ui->scriptMessagesTextEdit->appendPlainText(message);
 }
 
 /**
@@ -101,12 +121,17 @@ void MainWindow::handleError(const QString& message)
  *
  * This method updates the UI's buttons to allow another command to be executed.
  */
-void MainWindow::commandFinished()
+void MainWindow::commandFinished(bool hasErrors)
 {
     ui->runButton->setEnabled(true);
     ui->haltButton->setEnabled(false);
     ui->pauseButton->setEnabled(false);
     ui->resumeButton->setEnabled(false);
+
+    if (!hasErrors)
+    {
+        ui->errorMessagesTextEdit->clear();
+    }
 }
 
 /**

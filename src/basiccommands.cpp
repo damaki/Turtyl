@@ -139,6 +139,7 @@ void setupCommands(lua_State* state, CommandRunner* parent)
     lua_register(state, "clear", &clear);
     lua_register(state, "set_background_color", &setBackgroundColor);
     lua_register(state, "get_background_color", &getBackgroundColor);
+    lua_register(state, "print_message", &printMessage);
 }
 
 /**
@@ -306,4 +307,23 @@ int getBackgroundColor(lua_State* state)
     lua_pushinteger(state, color.blue());
 
     return 3;
+}
+
+int printMessage(lua_State* state)
+{
+    QString message;
+
+    const int argc = lua_gettop(state);
+
+    for (int i = 1; i <= argc; i++)
+    {
+        if (lua_isstring(state, i) || lua_isnumber(state, i))
+        {
+            message.append(lua_tostring(state, i));
+        }
+    }
+
+    getParent(state).printMessage(message);
+
+    return 0;
 }

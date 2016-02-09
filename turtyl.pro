@@ -74,3 +74,6 @@ SOURCES += src/lua/lapi.c \
 
 OTHER_FILES += \
     scripts/turtle.lua
+
+DISTFILES += \
+    scripts/print.lua

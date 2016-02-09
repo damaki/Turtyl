@@ -31,5 +31,6 @@ int drawArc(lua_State* state);
 int clear(lua_State* state);
 int setBackgroundColor(lua_State* state);
 int getBackgroundColor(lua_State* state);
+int printMessage(lua_State* state);
 
 #endif // BASICCOMMANDS_H

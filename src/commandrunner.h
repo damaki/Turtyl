@@ -54,10 +54,13 @@ public:
 
     void checkPause();
     bool isHaltRequested() const;
+    void printMessage(const QString& message);
 
 signals:
-    void commandFinished();
+    void commandFinished(bool hasErrors);
     void commandError(const QString& message);
+
+    void commandMessage(const QString& message);
 
 protected:
     virtual void run();

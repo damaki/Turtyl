@@ -154,13 +154,19 @@ void CommandRunner::runScriptFile(const QString& filename)
         }
     }
 
-    if (!success)
+    if (success)
+    {
+        emit commandFinished(false);
+    }
+    else
     {
         const char* errmsg = lua_tostring(m_state, -1);
         if (NULL != errmsg)
         {
             emit commandError(QString(errmsg));
         }
+
+        emit commandFinished(true);
     }
 }
 
@@ -192,6 +198,11 @@ bool CommandRunner::isHaltRequested() const
 {
     QMutexLocker lock(&m_haltMutex);
     return m_halt;
+}
+
+void CommandRunner::printMessage(const QString& message)
+{
+    emit commandMessage(message);
 }
 
 void CommandRunner::run()
@@ -237,17 +248,20 @@ void CommandRunner::run()
                 }
             }
 
-            if (!success)
+            if (success)
+            {
+                emit commandFinished(false);
+            }
+            else
             {
                 const char* errmsg = lua_tostring(m_state, -1);
                 if (NULL != errmsg)
                 {
                     emit commandError(QString(errmsg));
                 }
-            }
 
-            // Always emit commandFinished() at the end of a script, regardless of errors
-            emit commandFinished();
+                emit commandFinished(true);
+            }
         }
     }
 }
