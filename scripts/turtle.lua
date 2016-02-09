@@ -20,6 +20,25 @@ local function snapposition(pos)
     return {x=snap(pos.x), y=snap(pos.y)}
 end
 
+local function parsecolor(r,g,b, funcname)
+    -- If only the 'r' parameter is given (the others are nil) then
+    -- 'r' is treated as a color table (containing RGB values).
+    if r ~= nil and g == nil and b == nil then
+        if r["r"] ~= nil and
+           r["g"] ~= nil and
+           r["b"] ~= nil then
+            return r.r, r.g, r.b
+        else
+            error("The color passed to " .. funcname .. "() must have 'r', 'g', and 'b' values")
+        end
+
+    else
+       assert(g ~= nil and b ~= nil, "expected 3 number arguments to " .. funcname .. "()")
+
+       return r,g,b
+    end
+end
+
 -------------------------------------------------------------------------------
 -- Turtle class.
 --
@@ -63,7 +82,6 @@ function Turtle:forward(distance)
     end
 
     self.position = endpos
-    print(self.position.x, self.position.y)
 end
 
 function Turtle:backward(distance)
@@ -110,27 +128,6 @@ darkYellow  = {r=128, g=128, b=0  }
 gray        = {r=160, g=160, b=164}
 darkGray    = {r=128, g=128, b=128}
 lightGray   = {r=192, g=192, b=192}
-
--------------------------------------------------------------------------------
--- Helpers
-local function parsecolor(r,g,b, funcname)
-    -- If only the 'r' parameter is given (the others are nil) then
-    -- 'r' is treated as a color table (containing RGB values).
-    if r ~= nil and g == nil and b == nil then
-        if r["r"] ~= nil and
-           r["g"] ~= nil and
-           r["b"] ~= nil then
-            return r.r, r.g, r.b
-        else
-            error("The color passed to " .. funcname .. "() must have 'r', 'g', and 'b' values")
-        end
-
-    else
-       assert(g ~= nil and b ~= nil, "expected 3 number arguments to " .. funcname .. "()")
-
-       return r,g,b
-    end
-end
 
 -------------------------------------------------------------------------------
 -- Standard Logo turtle commands
