@@ -1,4 +1,26 @@
 -------------------------------------------------------------------------------
+-- Utilities
+
+-- Snaps a float position to the nearest integer coordinates.
+--
+-- params:
+--    pos - a table containing x & y keys
+--
+-- returns a copy of 'pos' with the x & y coordinates snapped to the nearest
+--    integer coordinates.
+local function snapposition(pos)
+    local function snap(value)
+        if value >= 0 then
+            return math.floor(value + 0.5)
+        else
+            return math.ceil(value - 0.5)
+        end
+    end
+
+    return {x=snap(pos.x), y=snap(pos.y)}
+end
+
+-------------------------------------------------------------------------------
 -- Turtle class.
 --
 -- The turtle class manages the state for a turtle:
@@ -14,11 +36,12 @@ Turtle.__index = Turtle
 function Turtle.new()
     local t = setmetatable({}, Turtle)
 
-    t.position  = {x=0.0, y=0.0}
-    t.pencolor  = {r=255, g=255, b=255}
-    t.heading   = 0.0 -- turtle heading in radians
-    t.thickness = 1
-    t.pendown   = true
+    t.position      = {x=0.0, y=0.0}
+    t.pencolor      = {r=255, g=255, b=255}
+    t.heading       = 0.0 -- turtle heading in radians
+    t.thickness     = 1
+    t.pendown       = true
+    t.snapenabled   = true
 
     return t
 end
@@ -28,6 +51,10 @@ function Turtle:forward(distance)
     endpos.x = self.position.x + (distance * math.sin(self.heading))
     endpos.y = self.position.y + (distance * math.cos(self.heading))
 
+    if self.snapenabled then
+        endpos = snapposition(endpos)
+    end
+
     if self.pendown then
         draw_line(self.position.x, self.position.y,
                   endpos.x, endpos.y,
@@ -36,6 +63,7 @@ function Turtle:forward(distance)
     end
 
     self.position = endpos
+    print(self.position.x, self.position.y)
 end
 
 function Turtle:backward(distance)
@@ -139,17 +167,17 @@ function setsize(size)
     turtle.thickness = size
 end
 
-function color(r,g,b)
-    assert(r ~= nil, "missing argument to color()")
+function setpencolor(r,g,b)
+    assert(r ~= nil, "missing argument to setpencolor()")
 
-    r,g,b = parsecolor(r,g,b,"color")
+    r,g,b = parsecolor(r,g,b,"setpencolor")
     turtle.pencolor = {r=r, g=g, b=b}
 end
 
-function bgcolor(r,g,b)
-    assert(r ~= nil, "missing argument to bgcolor()")
+function setscreencolor(r,g,b)
+    assert(r ~= nil, "missing argument to setscreencolor()")
 
-    r,g,b = parsecolor(r,g,b,"bgcolor")
+    r,g,b = parsecolor(r,g,b,"setscreencolor")
     set_background_color(r,g,b)
 end
 
