@@ -40,6 +40,26 @@ local function parsecolor(r,g,b, funcname)
 end
 
 -------------------------------------------------------------------------------
+-- Standard colors
+white       = {r=255, g=255, b=255}
+black       = {r=0,   g=0,   b=0  }
+red         = {r=255, g=0,   b=0  }
+darkRed     = {r=128, g=0,   b=0  }
+green       = {r=0,   g=255, b=0  }
+darkGreen   = {r=0,   g=128, b=0  }
+blue        = {r=0,   g=0,   b=255}
+darkBlue    = {r=0,   g=0,   b=128}
+cyan        = {r=0,   g=255, b=255}
+darkCyan    = {r=0,   g=128, b=128}
+magenta     = {r=255, g=0,   b=255}
+darkMagenta = {r=128, g=0,   b=128}
+yellow      = {r=255, g=255, b=0  }
+darkYellow  = {r=128, g=128, b=0  }
+gray        = {r=160, g=160, b=164}
+darkGray    = {r=128, g=128, b=128}
+lightGray   = {r=192, g=192, b=192}
+
+-------------------------------------------------------------------------------
 -- Turtle class.
 --
 -- The turtle class manages the state for a turtle:
@@ -56,7 +76,7 @@ function Turtle.new()
     local t = setmetatable({}, Turtle)
 
     t.position      = {x=0.0, y=0.0}
-    t.pencolor      = {r=255, g=255, b=255}
+    t.pencolor      = black
     t.heading       = 0.0 -- turtle heading in radians
     t.thickness     = 1
     t.pendown       = true
@@ -108,26 +128,6 @@ function Turtle:arc(radius, angle)
 end
 
 local turtle = Turtle.new()
-
--------------------------------------------------------------------------------
--- Standard colors
-white       = {r=255, g=255, b=255}
-black       = {r=0,   g=0,   b=0  }
-red         = {r=255, g=0,   b=0  }
-darkRed     = {r=128, g=0,   b=0  }
-green       = {r=0,   g=255, b=0  }
-darkGreen   = {r=0,   g=128, b=0  }
-blue        = {r=0,   g=0,   b=255}
-darkBlue    = {r=0,   g=0,   b=128}
-cyan        = {r=0,   g=255, b=255}
-darkCyan    = {r=0,   g=128, b=128}
-magenta     = {r=255, g=0,   b=255}
-darkMagenta = {r=128, g=0,   b=128}
-yellow      = {r=255, g=255, b=0  }
-darkYellow  = {r=128, g=128, b=0  }
-gray        = {r=160, g=160, b=164}
-darkGray    = {r=128, g=128, b=128}
-lightGray   = {r=192, g=192, b=192}
 
 -------------------------------------------------------------------------------
 -- Standard Logo turtle commands

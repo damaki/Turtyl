@@ -30,7 +30,7 @@ static const int DEFAULT_SIZE = 2048;
 TurtleGraphicsItem::TurtleGraphicsItem() :
     m_mutex(),
     m_pixmap(DEFAULT_SIZE, DEFAULT_SIZE),
-    m_backgroundColor(Qt::black),
+    m_backgroundColor(Qt::white),
     m_antialiased(false)
 {
     // We need to call update() each time the canvas is updated (i.e. drawn on)
