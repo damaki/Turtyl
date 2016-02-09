@@ -20,7 +20,7 @@
 #include "preferencesdialog.h"
 #include "ui_preferencesdialog.h"
 
-PreferencesDialog::PreferencesDialog(TurtleGraphicsCanvasItem* const graphicsWidget,
+PreferencesDialog::PreferencesDialog(TurtleCanvasGraphicsItem* const graphicsWidget,
                                      QWidget* const parent) :
     QDialog(parent),
     ui(new Ui::PreferencesDialog),
@@ -34,6 +34,26 @@ PreferencesDialog::PreferencesDialog(TurtleGraphicsCanvasItem* const graphicsWid
 PreferencesDialog::~PreferencesDialog()
 {
     delete ui;
+}
+
+int PreferencesDialog::canvasSize() const
+{
+    return ui->canvasSizeSpinBox->value();
+}
+
+bool PreferencesDialog::antialias() const
+{
+    return ui->antialiasingCheckBox->checkState() == Qt::Checked;
+}
+
+bool PreferencesDialog::autoShowScriptErrors() const
+{
+    return ui->autoShowErrorsCheckBox->checkState() == Qt::Checked;
+}
+
+bool PreferencesDialog::autoShowScriptOutput() const
+{
+    return ui->autoShowOutputCheckBox->checkState() == Qt::Checked;
 }
 
 void PreferencesDialog::loadPreferences()

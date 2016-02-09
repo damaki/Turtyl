@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***********************************************************************/
-#include "turtlegraphicswidget.h"
+#include "turtlecanvasgraphicsitem.h"
 #include <QMutexLocker>
 #include <QPainter>
 #include <QPaintEvent>
@@ -27,7 +27,7 @@
 
 static const int DEFAULT_SIZE = 2048;
 
-TurtleGraphicsCanvasItem::TurtleGraphicsCanvasItem() :
+TurtleCanvasGraphicsItem::TurtleCanvasGraphicsItem() :
     m_mutex(),
     m_pixmap(DEFAULT_SIZE, DEFAULT_SIZE),
     m_backgroundColor(Qt::white),
@@ -45,19 +45,19 @@ TurtleGraphicsCanvasItem::TurtleGraphicsCanvasItem() :
     setPos(-newpos, -newpos);
 }
 
-bool TurtleGraphicsCanvasItem::antialiased() const
+bool TurtleCanvasGraphicsItem::antialiased() const
 {
     QMutexLocker lock(&m_mutex);
     return m_antialiased;
 }
 
-void TurtleGraphicsCanvasItem::setAntialiased(const bool on)
+void TurtleCanvasGraphicsItem::setAntialiased(const bool on)
 {
     QMutexLocker lock(&m_mutex);
     m_antialiased = on;
 }
 
-QColor TurtleGraphicsCanvasItem::backgroundColor() const
+QColor TurtleCanvasGraphicsItem::backgroundColor() const
 {
     QMutexLocker lock(&m_mutex);
     return m_backgroundColor;
@@ -71,7 +71,7 @@ QColor TurtleGraphicsCanvasItem::backgroundColor() const
  *
  * @param color The new background color.
  */
-void TurtleGraphicsCanvasItem::setBackgroundColor(const QColor& color)
+void TurtleCanvasGraphicsItem::setBackgroundColor(const QColor& color)
 {
     {
         QMutexLocker lock(&m_mutex);
@@ -86,7 +86,7 @@ void TurtleGraphicsCanvasItem::setBackgroundColor(const QColor& color)
  *
  * The canvasUpdated() signal is emitted after the canvas is cleared.
  */
-void TurtleGraphicsCanvasItem::clear()
+void TurtleCanvasGraphicsItem::clear()
 {
     {
         QMutexLocker lock(&m_mutex);
@@ -104,7 +104,7 @@ void TurtleGraphicsCanvasItem::clear()
  * @param[in] line The line to draw.
  * @param[in] pen The pen to use for drawing the line.
  */
-void TurtleGraphicsCanvasItem::drawLine(const QLineF &line, const QPen &pen)
+void TurtleCanvasGraphicsItem::drawLine(const QLineF &line, const QPen &pen)
 {
     {
         QMutexLocker lock(&m_mutex);
@@ -178,7 +178,7 @@ void TurtleGraphicsCanvasItem::drawLine(const QLineF &line, const QPen &pen)
  * @param radius The radius of the arc.
  * @param pen The pen to use for drawing the arc.
  */
-void TurtleGraphicsCanvasItem::drawArc(const QPointF &centerPos,
+void TurtleCanvasGraphicsItem::drawArc(const QPointF &centerPos,
                                    qreal startAngle,
                                    qreal angle,
                                    qreal xradius,
@@ -230,7 +230,7 @@ void TurtleGraphicsCanvasItem::drawArc(const QPointF &centerPos,
  *
  * @return The canvas size.
  */
-int TurtleGraphicsCanvasItem::size() const
+int TurtleCanvasGraphicsItem::size() const
 {
     QMutexLocker lock(&m_mutex);
     return m_pixmap.width();
@@ -244,7 +244,7 @@ int TurtleGraphicsCanvasItem::size() const
  * @param newSize The size (in pixels) of the new canvas. If the size is the same
  *     as the current size then this method has no effect.
  */
-void TurtleGraphicsCanvasItem::resize(int newSize)
+void TurtleCanvasGraphicsItem::resize(int newSize)
 {
     bool wasResized = false;
 
@@ -293,12 +293,12 @@ void TurtleGraphicsCanvasItem::resize(int newSize)
     }
 }
 
-QRectF TurtleGraphicsCanvasItem::boundingRect() const
+QRectF TurtleCanvasGraphicsItem::boundingRect() const
 {
     return m_pixmap.rect();
 }
 
-void TurtleGraphicsCanvasItem::paint(QPainter *painter,
+void TurtleCanvasGraphicsItem::paint(QPainter *painter,
                                const QStyleOptionGraphicsItem *,
                                QWidget *)
 {
@@ -313,7 +313,7 @@ void TurtleGraphicsCanvasItem::paint(QPainter *painter,
  * The purpose of this method is to allow update() to be indirectly called
  * by the UI thread by a queued signal.
  */
-void TurtleGraphicsCanvasItem::callUpdate()
+void TurtleCanvasGraphicsItem::callUpdate()
 {
     update();
 }

@@ -24,7 +24,7 @@
 #include <QSemaphore>
 #include <QQueue>
 #include <QWaitCondition>
-#include "turtlegraphicswidget.h"
+#include "turtlecanvasgraphicsitem.h"
 #include "lua.hpp"
 
 /**
@@ -38,9 +38,9 @@ class ScriptRunner : public QThread
     Q_OBJECT
 
 public:
-    ScriptRunner(TurtleGraphicsCanvasItem* graphicsWidget);
+    ScriptRunner(TurtleCanvasGraphicsItem* graphicsWidget);
 
-    TurtleGraphicsCanvasItem* graphicsWidget() const;
+    TurtleCanvasGraphicsItem* graphicsWidget() const;
 
     void requestThreadStop();
 
@@ -67,7 +67,7 @@ protected:
 
 private:
     lua_State* m_state;
-    TurtleGraphicsCanvasItem* m_graphicsWidget;
+    TurtleCanvasGraphicsItem* m_graphicsWidget;
 
     mutable QMutex m_luaMutex; // locked while a script is running
 

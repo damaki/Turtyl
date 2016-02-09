@@ -28,7 +28,7 @@
 #include "commandrunner.h"
 #include "helpdialog.h"
 #include "preferencesdialog.h"
-#include "turtlegraphicswidget.h"
+#include "turtlecanvasgraphicsitem.h"
 
 namespace Ui {
 class MainWindow;
@@ -58,11 +58,14 @@ private slots:
 
     void resizeGraphicsScene();
 
+    void showErrors();
+    void showScriptOutputs();
+
 private:
     Ui::MainWindow *ui;
 
     QGraphicsScene* m_scene;
-    TurtleGraphicsCanvasItem* m_turtleGraphics;
+    TurtleCanvasGraphicsItem* m_turtleGraphics;
     ScriptRunner m_cmds;
 
     PreferencesDialog* m_prefsDialog;

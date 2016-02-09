@@ -22,7 +22,7 @@
 #include <QMutexLocker>
 #include <cassert>
 
-ScriptRunner::ScriptRunner(TurtleGraphicsCanvasItem* const graphicsWidget) :
+ScriptRunner::ScriptRunner(TurtleCanvasGraphicsItem* const graphicsWidget) :
     m_state(luaL_newstate()),
     m_graphicsWidget(graphicsWidget),
     m_scriptDataSema(),
@@ -52,7 +52,7 @@ ScriptRunner::ScriptRunner(TurtleGraphicsCanvasItem* const graphicsWidget) :
     setupCommands(m_state, this);
 }
 
-TurtleGraphicsCanvasItem* ScriptRunner::graphicsWidget() const
+TurtleCanvasGraphicsItem* ScriptRunner::graphicsWidget() const
 {
     return m_graphicsWidget;
 }

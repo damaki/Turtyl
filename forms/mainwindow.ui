@@ -168,7 +168,14 @@
     <property name="title">
      <string>&amp;Window</string>
     </property>
-    <addaction name="actionShow_Messages"/>
+    <widget class="QMenu" name="menu_Output_Panes">
+     <property name="title">
+      <string>&amp;Output Panes</string>
+     </property>
+     <addaction name="action_Errors"/>
+     <addaction name="action_Script_Output"/>
+    </widget>
+    <addaction name="menu_Output_Panes"/>
    </widget>
    <addaction name="menuLuogo"/>
    <addaction name="menu_Edit"/>
@@ -206,7 +213,7 @@
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="errorsTab">
         <attribute name="title">
@@ -230,7 +237,7 @@
        </widget>
        <widget class="QWidget" name="outputTab">
         <attribute name="title">
-         <string>Output</string>
+         <string>Script Output</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
@@ -292,15 +299,14 @@
     <string>&amp;Preferences...</string>
    </property>
   </action>
-  <action name="actionShow_Messages">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
+  <action name="action_Errors">
    <property name="text">
-    <string>&amp;Messages</string>
+    <string>&amp;Errors</string>
+   </property>
+  </action>
+  <action name="action_Script_Output">
+   <property name="text">
+    <string>&amp;Script Output</string>
    </property>
   </action>
  </widget>
@@ -320,38 +326,6 @@
     <hint type="destinationlabel">
      <x>199</x>
      <y>149</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionShow_Messages</sender>
-   <signal>triggered(bool)</signal>
-   <receiver>messagesDockWidget</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>399</x>
-     <y>491</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>messagesDockWidget</sender>
-   <signal>visibilityChanged(bool)</signal>
-   <receiver>actionShow_Messages</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>399</x>
-     <y>491</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
     </hint>
    </hints>
   </connection>
