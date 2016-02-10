@@ -111,10 +111,10 @@ function Turtle:forward(distance)
     end
 
     if self.pendown then
-        draw_line(self.position.x, self.position.y,
-                  endpos.x, endpos.y,
-                  self.pencolor.r, self.pencolor.g, self.pencolor.b, self.pencolor.a,
-                  self.thickness)
+        _ui.canvas.drawline(self.position.x, self.position.y,
+                            endpos.x, endpos.y,
+                            self.pencolor.r, self.pencolor.g, self.pencolor.b, self.pencolor.a,
+                            self.thickness)
     end
 
     self.position = endpos
@@ -138,13 +138,13 @@ function Turtle:arc(angle, xradius, yradius)
             yradius = xradius
         end
 
-        draw_arc(self.position.x, self.position.y,
-                 math.deg(self.heading),
-                 angle,
-                 xradius,
-                 yradius,
-                 self.pencolor.r, self.pencolor.g, self.pencolor.b, self.pencolor.a,
-                 self.thickness)
+        _ui.canvas.drawarc(self.position.x, self.position.y,
+                           math.deg(self.heading),
+                           angle,
+                           xradius,
+                           yradius,
+                           self.pencolor.r, self.pencolor.g, self.pencolor.b, self.pencolor.a,
+                           self.thickness)
     end
 end
 
@@ -217,6 +217,10 @@ function pd()
     turtle.pendown = true
 end
 
+function clear()
+    _ui.canvas.clear()
+end
+
 function setpensize(size)
     assert(type(size) == "number", "argument to setpensize() must be a number")
     turtle.thickness = size
@@ -236,11 +240,11 @@ end
 
 function setscreencolor(r,g,b)
     local newcolor = parsecolor(r,g,b)
-    set_background_color(newcolor.r, newcolor.g, newcolor.b)
+    _ui.canvas.setbackgroundcolor(newcolor.r, newcolor.g, newcolor.b)
 end
 
 function screencolor()
-    return get_background_color()
+    return _ui.canvas.backgroundcolor()
 end
 
 function home()

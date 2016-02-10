@@ -30,5 +30,5 @@ function print(...)
         end
     end
 
-    print_message(msg)
+    _ui.print(msg)
 end

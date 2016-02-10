@@ -101,7 +101,7 @@ void MainWindow::runScript()
 {
     ui->errorMessagesTextEdit->clear();
 
-    m_cmds.runCommand(ui->cmdEdit->document()->toPlainText());
+    m_cmds.runScript(ui->cmdEdit->document()->toPlainText());
 
     ui->runButton->setEnabled(false);
     ui->haltButton->setEnabled(true);

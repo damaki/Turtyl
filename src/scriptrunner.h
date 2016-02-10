@@ -48,11 +48,10 @@ public:
     void resumeScript();
     void haltScript();
 
-    void runCommand(const QString& command);
+    void runScript(const QString& script);
 
     void runScriptFile(const QString& filename);
 
-    void checkPause();
     bool haltRequested() const;
     void printMessage(const QString& message);
 
@@ -66,14 +65,28 @@ protected:
     virtual void run();
 
 private:
+    void setupCommands(lua_State* state);
+
+    void debugHook(lua_State* state);
+
+    static int drawLine(lua_State* state);
+    static int drawArc(lua_State* state);
+    static int clearScreen(lua_State* state);
+    static int setBackgroundColor(lua_State* state);
+    static int getBackgroundColor(lua_State* state);
+    static int printMessage(lua_State* state);
+
+    static void debugHookEntry(lua_State* state, lua_Debug* );
+
+
     lua_State* m_state;
     TurtleCanvasGraphicsItem* m_graphicsWidget;
 
     mutable QMutex m_luaMutex; // locked while a script is running
 
-    QSemaphore m_scriptDataSema;
-    mutable QMutex m_scriptDataMutex;
-    QQueue<QString> m_scriptData;
+    QSemaphore m_scriptsQueueSema;
+    mutable QMutex m_scriptsQueueMutex;
+    QQueue<QString> m_scriptsQueue;
 
     QWaitCondition m_pauseCond;
     mutable QMutex m_pauseMutex;

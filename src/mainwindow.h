@@ -25,7 +25,7 @@
 #include <QGraphicsView>
 #include <QPlainTextEdit>
 #include <QSpinBox>
-#include "commandrunner.h"
+#include "scriptrunner.h"
 #include "helpdialog.h"
 #include "preferencesdialog.h"
 #include "turtlecanvasgraphicsitem.h"

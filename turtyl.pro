@@ -19,18 +19,16 @@ DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 SOURCES += src/main.cpp\
     src/mainwindow.cpp \
-    src/commandrunner.cpp \
-    src/basiccommands.cpp \
     src/preferencesdialog.cpp \
     src/helpdialog.cpp \
-    src/turtlecanvasgraphicsitem.cpp
+    src/turtlecanvasgraphicsitem.cpp \
+    src/scriptrunner.cpp
 
 HEADERS  += src/mainwindow.h \
-    src/commandrunner.h \
-    src/basiccommands.h \
     src/preferencesdialog.h \
     src/helpdialog.h \
-    src/turtlecanvasgraphicsitem.h
+    src/turtlecanvasgraphicsitem.h \
+    src/scriptrunner.h
 
 FORMS    += forms/mainwindow.ui \
     forms/preferencesdialog.ui \
