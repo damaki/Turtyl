@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = turtyl
 TEMPLATE = app
 
-CONFIG += static
+CONFIG += static c++11
 
 VERSION = 0.1.0
 

@@ -96,7 +96,6 @@ function Turtle.new()
     t.heading       = 0.0 -- turtle heading in radians
     t.thickness     = 1
     t.pendown       = true
-    t.snapenabled   = true
 
     return t
 end
@@ -105,10 +104,6 @@ function Turtle:forward(distance)
     local endpos = {}
     endpos.x = self.position.x + (distance * math.sin(self.heading))
     endpos.y = self.position.y + (distance * math.cos(self.heading))
-
-    if self.snapenabled then
-        endpos = snapposition(endpos)
-    end
 
     if self.pendown then
         _ui.canvas.drawline(self.position.x, self.position.y,
@@ -150,12 +145,7 @@ end
 
 function Turtle:setpos(x,y)
     local pos = {x=x, y=y}
-
-    if self.snapenabled then
-        self.position = snapposition(pos)
-    else
-        self.position = pos
-    end
+    self.position = pos
 end
 
 local turtle = Turtle.new()
@@ -254,15 +244,4 @@ end
 
 function circle(radius)
     arc(360, radius)
-end
-
--------------------------------------------------------------------------------
--- other commands
-
-function setsnap(on)
-    turtle.snapenabled = on
-end
-
-function snap()
-    return turtle.snapenabled
 end

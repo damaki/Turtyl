@@ -24,6 +24,7 @@
 #include <QResizeEvent>
 #include <QStyleOptionGraphicsItem>
 #include <cassert>
+#include <cmath>
 
 static const int DEFAULT_SIZE = 2048;
 
@@ -104,7 +105,7 @@ void TurtleCanvasGraphicsItem::clear()
  * @param[in] line The line to draw.
  * @param[in] pen The pen to use for drawing the line.
  */
-void TurtleCanvasGraphicsItem::drawLine(const QLineF &line, const QPen &pen)
+void TurtleCanvasGraphicsItem::drawLine(QLineF line, const QPen &pen)
 {
     {
         QMutexLocker lock(&m_mutex);
@@ -114,10 +115,32 @@ void TurtleCanvasGraphicsItem::drawLine(const QLineF &line, const QPen &pen)
 
         painter.setPen(pen);
 
+        line.translate(static_cast<qreal>(m_pixmap.width())  / 2.0,
+                       static_cast<qreal>(m_pixmap.height()) / 2.0);
+
+        if (!m_antialiased)
+        {
+            // Rendering artifacts can occur when AA is disabled due to QPainter::drawLine's
+            // apparent behaviour of casting the line's points from a qreal to an int without
+            // rounding, which causes rendering artifacts where some lines are offset by 1 pixel.
+            //
+            // For example, if a coordinate value is 4.99999 then QPainter clips this to 4, which
+            // causes an error.
+            //
+            // An example of a lua script which generates these artifacts is:
+            //    for n=1,1000,1 do fd(n) rt(90) end
+            //
+            // which generates a square spiral. There should always be a 1px gap between each line,
+            // but this is not always the case without this rounding fix.
+            line = QLineF(std::round(line.x1()),
+                          std::round(line.y1()),
+                          std::round(line.x2()),
+                          std::round(line.y2()));
+        }
+
         // Translate the origin from the user's perspective (center of the drawing area)
         // to QPixmap's origin (top-left of the pixmap).
-        painter.drawLine(line.translated(static_cast<qreal>(m_pixmap.width())  / 2.0,
-                                         static_cast<qreal>(m_pixmap.height()) / 2.0));
+        painter.drawLine(line);
     }
 
     emit canvasUpdated();

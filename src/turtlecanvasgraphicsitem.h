@@ -100,7 +100,7 @@ public:
 
     void clear();
 
-    void drawLine(const QLineF& line, const QPen& pen);
+    void drawLine(QLineF line, const QPen& pen);
 
     void drawArc(const QPointF& centerPos,
                  qreal startAngle,
