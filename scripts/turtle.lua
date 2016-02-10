@@ -245,3 +245,14 @@ end
 function circle(radius)
     arc(360, radius)
 end
+
+function line(length)
+    if turtle.pendown then
+        local x,y = pos() -- remember position
+        pu()
+        bk(length/2)
+        pd()
+        fd(length)
+        setpos(x,y) -- restore position
+    end
+end
