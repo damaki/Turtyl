@@ -92,6 +92,8 @@ class TurtleCanvasGraphicsItem : public QObject, public QGraphicsItem
 public:
     TurtleCanvasGraphicsItem();
 
+    QImage toImage(bool flatten) const;
+
     bool antialiased() const;
     void setAntialiased(bool on = true);
 

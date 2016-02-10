@@ -19,7 +19,9 @@
  ***********************************************************************/
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QScrollBar>
+#include <QFileDialog>
+#include <QImageWriter>
+#include <QMessageBox>
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -56,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pauseButton,  SIGNAL(clicked()), this, SLOT(pauseScript()));
     connect(ui->resumeButton, SIGNAL(clicked()), this, SLOT(resumeScript()));
 
+    connect(ui->action_Save_Canvas, SIGNAL(triggered()), this, SLOT(saveCanvas()));
     connect(ui->action_Preferences, SIGNAL(triggered()), m_prefsDialog, SLOT(show()));
     connect(ui->action_Preferences, SIGNAL(triggered()), m_prefsDialog, SLOT(loadPreferences()));
     connect(ui->action_About,       SIGNAL(triggered()), m_helpDialog,  SLOT(show()));
@@ -193,14 +196,70 @@ void MainWindow::resizeGraphicsScene()
     m_scene->setSceneRect(m_turtleGraphics->boundingRect().translated(m_turtleGraphics->pos()));
 }
 
+/**
+ * @brief Makes the "Errors" tab visible.
+ */
 void MainWindow::showErrors()
 {
     ui->messagesDockWidget->show();
     ui->messagesTabWidget->setCurrentWidget(ui->errorsTab);
 }
 
+/**
+ * @brief Makes the "Script Outputs" tab visible.
+ */
 void MainWindow::showScriptOutputs()
 {
     ui->messagesDockWidget->show();
     ui->messagesTabWidget->setCurrentWidget(ui->outputTab);
+}
+
+/**
+ * @brief Saves the current canvas to an image file.
+ *
+ * A QFileDialog is shown to the user to request the file name.
+ */
+void MainWindow::saveCanvas()
+{
+    // Build a list of supported image formats to be used by the save dialog
+    // E.g. "Images (*.bmp *.jpg)"
+    QList<QByteArray> imageFormats = QImageWriter::supportedImageFormats();
+    QString filter = tr("Images") + " (";
+    bool first = true;
+    for (QByteArray fmt : imageFormats)
+    {
+        if (!first)
+        {
+            // Separate each item with a space character
+            filter.append(' ');
+        }
+        first = false;
+
+        filter.append("*.");
+        filter.append(fmt);
+    }
+    filter += ")";
+
+
+    QFileDialog fileDialog(this);
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    fileDialog.setNameFilter(filter);
+    fileDialog.setWindowTitle(tr("Save Canvas"));
+
+    if (fileDialog.exec() != 0)
+    {
+        const QImage canvasImage(m_turtleGraphics->toImage(true));
+
+        for (QString filename : fileDialog.selectedFiles())
+        {
+            QImageWriter writer(filename);
+
+            if (!writer.write(canvasImage))
+            {
+                QString message = tr("Cannot write to file: ") + filename + '\n'
+                                  + writer.errorString();
+                QMessageBox::critical(this, tr("Save Error"), message);
+            }
+        }
+    }
 }

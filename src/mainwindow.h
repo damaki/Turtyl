@@ -61,6 +61,8 @@ private slots:
     void showErrors();
     void showScriptOutputs();
 
+    void saveCanvas();
+
 private:
     Ui::MainWindow *ui;
 

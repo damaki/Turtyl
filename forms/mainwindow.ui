@@ -150,6 +150,8 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <addaction name="action_Save_Canvas"/>
+    <addaction name="separator"/>
     <addaction name="action_Quit"/>
    </widget>
    <widget class="QMenu" name="menu_Edit">
@@ -307,6 +309,11 @@
   <action name="action_Script_Output">
    <property name="text">
     <string>&amp;Script Output</string>
+   </property>
+  </action>
+  <action name="action_Save_Canvas">
+   <property name="text">
+    <string>&amp;Save Canvas...</string>
    </property>
   </action>
  </widget>

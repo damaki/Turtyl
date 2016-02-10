@@ -46,6 +46,36 @@ TurtleCanvasGraphicsItem::TurtleCanvasGraphicsItem() :
     setPos(-newpos, -newpos);
 }
 
+/**
+ * @brief Return an image of the canvas.
+ *
+ * @param flatten Controls the alpha channel in the returned image.
+ *    When @p flatten is @c false the returned image has a transparent
+ *    background. When @c true the background of the returned image is
+ *    the canvas's background color, and the image contains no transparency.
+ * @return The canvas image.
+ */
+QImage TurtleCanvasGraphicsItem::toImage(bool flatten) const
+{
+    QImage image;
+
+    QMutexLocker lock(&m_mutex);
+    if (flatten)
+    {
+        image = QImage(m_pixmap.size(), QImage::Format_RGB32);
+
+        QPainter painter(&image);
+        painter.fillRect(image.rect(), m_backgroundColor);
+        painter.drawPixmap(image.rect(), m_pixmap);
+    }
+    else
+    {
+        image = m_pixmap.toImage();
+    }
+
+    return image;
+}
+
 bool TurtleCanvasGraphicsItem::antialiased() const
 {
     QMutexLocker lock(&m_mutex);
