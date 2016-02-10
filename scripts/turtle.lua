@@ -249,21 +249,16 @@ function home()
 end
 
 function circle(radius)
-    local ispendown = turtle.pendown
-
-    pu()
-    rt(90)
-    fd(radius)
-
-    if ispendown then
-        pd()
-    end
     arc(360, radius)
-    pu()
-    bk(radius)
-    lt(90)
+end
 
-    if ispendown then
-        pd()
-    end
+-------------------------------------------------------------------------------
+-- other commands
+
+function setsnap(on)
+    turtle.snapenabled = on
+end
+
+function snap()
+    return turtle.snapenabled
 end
