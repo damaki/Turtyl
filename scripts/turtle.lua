@@ -20,35 +20,49 @@ local function snapposition(pos)
     return {x=snap(pos.x), y=snap(pos.y)}
 end
 
+local function clip(value, min, max)
+    if value < min then
+        return min
+    elseif value > max then
+        return max
+    else
+        return value
+    end
+end
+
+local function clipcolor(value)
+    return clip(value,0,255)
+end
+
 local function parsecolor(r,g,b,a)
     local newcolor = {r=0, g=0, b=0, a=255}
 
     if type(r) == "table" then
         if r['r'] ~= nil then
-            newcolor.r = r.r
+            newcolor.r = clipcolor(r.r)
         end
         if r['g'] ~= nil then
-            newcolor.g = r.g
+            newcolor.g = clipcolor(r.g)
         end
         if r['b'] ~= nil then
-            newcolor.b = r.b
+            newcolor.b = clipcolor(r.b)
         end
         if r['a'] ~= nil then
-            newcolor.a = r.a
+            newcolor.a = clipcolor(r.a)
         end
 
     else
         if r ~= nil then
-            newcolor.r = r
+            newcolor.r = clipcolor(r)
         end
         if g ~= nil then
-            newcolor.g = g
+            newcolor.g = clipcolor(g)
         end
         if b ~= nil then
-            newcolor.b = b
+            newcolor.b = clipcolor(b)
         end
         if a ~= nil then
-            newcolor.a = a
+            newcolor.a = clipcolor(a)
         end
     end
 
