@@ -32,6 +32,7 @@ TurtleCanvasGraphicsItem::TurtleCanvasGraphicsItem() :
     m_mutex(),
     m_pixmap(DEFAULT_SIZE, DEFAULT_SIZE),
     m_backgroundColor(Qt::white),
+    m_usedRect(DEFAULT_SIZE/2,DEFAULT_SIZE/2,1,1),
     m_antialiased(false)
 {
     // We need to call update() each time the canvas is updated (i.e. drawn on)
@@ -49,29 +50,33 @@ TurtleCanvasGraphicsItem::TurtleCanvasGraphicsItem() :
 /**
  * @brief Return an image of the canvas.
  *
- * @param flatten Controls the alpha channel in the returned image.
- *    When @p flatten is @c false the returned image has a transparent
- *    background. When @c true the background of the returned image is
- *    the canvas's background color, and the image contains no transparency.
  * @return The canvas image.
  */
-QImage TurtleCanvasGraphicsItem::toImage(bool flatten) const
+QImage TurtleCanvasGraphicsItem::toImage(bool transparentBackground,
+                                         bool fitToUsedArea) const
 {
-    QImage image;
-
     QMutexLocker lock(&m_mutex);
-    if (flatten)
-    {
-        image = QImage(m_pixmap.size(), QImage::Format_RGB32);
+    QRect pixmapRect;
+    QImage::Format imageFormat;
 
-        QPainter painter(&image);
-        painter.fillRect(image.rect(), m_backgroundColor);
-        painter.drawPixmap(image.rect(), m_pixmap);
+    pixmapRect  = fitToUsedArea ? m_usedRect : m_pixmap.rect();
+
+    imageFormat = transparentBackground
+                    ? QImage::Format_ARGB32_Premultiplied
+                    : QImage::Format_RGB32;
+
+    QImage image = QImage(pixmapRect.size(), imageFormat);
+
+    QPainter painter(&image);
+    if (transparentBackground)
+    {
+        painter.fillRect(image.rect(), Qt::transparent);
     }
     else
     {
-        image = m_pixmap.toImage();
+        painter.fillRect(image.rect(), m_backgroundColor);
     }
+    painter.drawPixmap(image.rect(), m_pixmap, pixmapRect);
 
     return image;
 }
@@ -171,6 +176,9 @@ void TurtleCanvasGraphicsItem::drawLine(QLineF line, const QPen &pen)
         // Translate the origin from the user's perspective (center of the drawing area)
         // to QPixmap's origin (top-left of the pixmap).
         painter.drawLine(line);
+
+        updateUsedArea(line.p1());
+        updateUsedArea(line.p2());
     }
 
     emit canvasUpdated();
@@ -273,6 +281,11 @@ void TurtleCanvasGraphicsItem::drawArc(const QPointF &centerPos,
         painter.rotate(startAngle - 90.0);
 
         painter.drawArc(boundingBox, 0, angleInt);
+
+        updateUsedArea(boundingBox.topLeft());
+        updateUsedArea(boundingBox.topRight());
+        updateUsedArea(boundingBox.bottomLeft());
+        updateUsedArea(boundingBox.bottomRight());
     }
 
     emit canvasUpdated();
@@ -361,4 +374,59 @@ void TurtleCanvasGraphicsItem::paint(QPainter *painter,
 void TurtleCanvasGraphicsItem::callUpdate()
 {
     update();
+}
+
+void TurtleCanvasGraphicsItem::updateUsedArea(const QPoint& point)
+{
+    const QRect rect = m_pixmap.rect();
+    int top;
+    int bottom;
+    int left;
+    int right;
+
+    if (rect.contains(point))
+    {
+        top    = point.y();
+        bottom = point.y();
+        left   = point.x();
+        right  = point.x();
+    }
+    else
+    {
+        top    = rect.top();
+        bottom = rect.bottom();
+        left   = rect.left();
+        right  = rect.right();
+    }
+
+    if (point.x() < m_usedRect.left())
+    {
+        m_usedRect.setLeft(left);
+    }
+    if (point.x() > m_usedRect.right())
+    {
+        m_usedRect.setRight(right);
+    }
+    if (point.y() < m_usedRect.top())
+    {
+        m_usedRect.setTop(top);
+    }
+    if (point.y() > m_usedRect.bottom())
+    {
+        m_usedRect.setBottom(bottom);
+    }
+
+    assert(m_pixmap.rect().contains(point)
+           ? m_usedRect.contains(point)
+           : true);
+    assert(m_pixmap.rect().contains(m_usedRect.topLeft()));
+    assert(m_pixmap.rect().contains(m_usedRect.topRight()));
+    assert(m_pixmap.rect().contains(m_usedRect.bottomLeft()));
+    assert(m_pixmap.rect().contains(m_usedRect.bottomRight()));
+}
+
+void TurtleCanvasGraphicsItem::updateUsedArea(const QPointF& point)
+{
+    updateUsedArea(QPoint(static_cast<int>(std::round(point.x())),
+                          static_cast<int>(std::round(point.y()))));
 }

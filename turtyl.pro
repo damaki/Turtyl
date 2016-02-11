@@ -22,17 +22,20 @@ SOURCES += src/main.cpp\
     src/preferencesdialog.cpp \
     src/turtlecanvasgraphicsitem.cpp \
     src/scriptrunner.cpp \
-    src/aboutdialog.cpp
+    src/aboutdialog.cpp \
+    src/canvassaveoptionsdialog.cpp
 
 HEADERS  += src/mainwindow.h \
     src/preferencesdialog.h \
     src/turtlecanvasgraphicsitem.h \
     src/scriptrunner.h \
-    src/aboutdialog.h
+    src/aboutdialog.h \
+    src/canvassaveoptionsdialog.h
 
 FORMS    += forms/mainwindow.ui \
     forms/preferencesdialog.ui \
-    forms/aboutdialog.ui
+    forms/aboutdialog.ui \
+    forms/canvassaveoptionsdialog.ui
 
 # Lua sources
 INCLUDEPATH += src/lua

@@ -34,7 +34,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_turtleGraphics(new TurtleCanvasGraphicsItem),
     m_cmds(m_turtleGraphics),
     m_prefsDialog(new PreferencesDialog(this)),
-    m_aboutDialog(new AboutDialog(this))
+    m_aboutDialog(new AboutDialog(this)),
+    m_canvasSaveOptionsDialog(new CanvasSaveOptionsDialog(this))
 {
     ui->setupUi(this);
 
@@ -257,17 +258,21 @@ void MainWindow::saveCanvas()
 
     if (fileDialog.exec() != 0)
     {
-        const QImage canvasImage(m_turtleGraphics->toImage(true));
-
-        for (QString filename : fileDialog.selectedFiles())
+        if (m_canvasSaveOptionsDialog->exec() != 0)
         {
-            QImageWriter writer(filename);
+            const QImage canvasImage(m_turtleGraphics->toImage(m_canvasSaveOptionsDialog->transparentBackground(),
+                                                               m_canvasSaveOptionsDialog->fitToUsedArea()));
 
-            if (!writer.write(canvasImage))
+            for (QString filename : fileDialog.selectedFiles())
             {
-                QString message = tr("Cannot write to file: ") + filename + '\n'
-                                  + writer.errorString();
-                QMessageBox::critical(this, tr("Save Error"), message);
+                QImageWriter writer(filename);
+
+                if (!writer.write(canvasImage))
+                {
+                    QString message = tr("Cannot write to file: ") + filename + '\n'
+                                      + writer.errorString();
+                    QMessageBox::critical(this, tr("Save Error"), message);
+                }
             }
         }
     }

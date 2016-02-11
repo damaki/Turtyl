@@ -28,6 +28,7 @@
 #include "scriptrunner.h"
 #include "aboutdialog.h"
 #include "preferencesdialog.h"
+#include "canvassaveoptionsdialog.h"
 #include "turtlecanvasgraphicsitem.h"
 
 namespace Ui {
@@ -78,6 +79,7 @@ private:
 
     PreferencesDialog* m_prefsDialog;
     AboutDialog* m_aboutDialog;
+    CanvasSaveOptionsDialog* m_canvasSaveOptionsDialog;
 };
 
 #endif // MAINWINDOW_H

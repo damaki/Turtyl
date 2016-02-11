@@ -92,7 +92,8 @@ class TurtleCanvasGraphicsItem : public QObject, public QGraphicsItem
 public:
     TurtleCanvasGraphicsItem();
 
-    QImage toImage(bool flatten) const;
+    QImage toImage(bool transparentBackground,
+                   bool fitToUsedArea) const;
 
     bool antialiased() const;
     void setAntialiased(bool on = true);
@@ -126,10 +127,15 @@ private slots:
     void callUpdate();
 
 private:
+    void updateUsedArea(const QPoint& point);
+    void updateUsedArea(const QPointF& point);
+
     mutable QMutex m_mutex;
 
     QPixmap m_pixmap;
     QColor m_backgroundColor;
+
+    QRect m_usedRect;
 
     bool m_antialiased;
 };
