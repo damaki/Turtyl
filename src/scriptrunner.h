@@ -48,6 +48,8 @@ public:
     void resumeScript();
     void haltScript();
 
+    void addRequirePath(QString path);
+
     void runScript(const QString& script);
 
     void runScriptFile(const QString& filename);

@@ -239,6 +239,33 @@ void ScriptRunner::haltScript()
     resumeScript();
 }
 
+void ScriptRunner::addRequirePath(QString path)
+{
+    path = path.trimmed().prepend(';');
+
+    QMutexLocker lock(&m_luaMutex);
+
+    // Ensure a clean stack
+    lua_pop(m_state, lua_gettop(m_state));
+
+    if (!lua_getglobal(m_state, "package"))
+    {
+        return;
+    }
+
+    if (!lua_getfield(m_state, 1, "path"))
+    {
+        lua_pop(m_state, 1);
+        return;
+    }
+
+    lua_pushstring(m_state, path.toStdString().c_str());
+    lua_concat(m_state, 2);
+    lua_setfield(m_state, 1, "path");
+
+    lua_pop(m_state, lua_gettop(m_state));
+}
+
 /**
  * @brief Executes a Lua script script.
  *
