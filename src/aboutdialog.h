@@ -17,23 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***********************************************************************/
-#ifndef HELPDIALOG_H
-#define HELPDIALOG_H
+#ifndef ABOUTDIALOG_H
+#define ABOUTDIALOG_H
 
 #include <QDialog>
 #include <QTextEdit>
 
 namespace Ui {
-class HelpDialog;
+class AboutDialog;
 }
 
-class HelpDialog : public QDialog
+class AboutDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit HelpDialog(QWidget *parent = 0);
-    ~HelpDialog();
+    explicit AboutDialog(QWidget *parent = 0);
+    ~AboutDialog();
 
 private slots:
     void licenseClicked(bool checked);
@@ -42,7 +42,7 @@ private slots:
 private:
     static void fillProgramDetails(QString& string);
 
-    Ui::HelpDialog *ui;
+    Ui::AboutDialog *ui;
 };
 
-#endif // HELPDIALOG_H
+#endif // ABOUTDIALOG_H

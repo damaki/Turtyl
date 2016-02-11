@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_turtleGraphics(new TurtleCanvasGraphicsItem),
     m_cmds(m_turtleGraphics),
     m_prefsDialog(new PreferencesDialog(this)),
-    m_helpDialog(new HelpDialog(this))
+    m_helpDialog(new AboutDialog(this))
 {
     ui->setupUi(this);
 

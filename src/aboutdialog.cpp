@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***********************************************************************/
-#include "src/helpdialog.h"
-#include "ui_helpdialog.h"
+#include "aboutdialog.h"
+#include "ui_aboutdialog.h"
 
-HelpDialog::HelpDialog(QWidget *parent) :
+AboutDialog::AboutDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::HelpDialog)
+    ui(new Ui::AboutDialog)
 {
     ui->setupUi(this);
 
@@ -50,12 +50,12 @@ HelpDialog::HelpDialog(QWidget *parent) :
             this, SLOT(aboutQtClicked(bool)));
 }
 
-HelpDialog::~HelpDialog()
+AboutDialog::~AboutDialog()
 {
     delete ui;
 }
 
-void HelpDialog::licenseClicked(bool checked)
+void AboutDialog::licenseClicked(bool checked)
 {
     if (checked)
     {
@@ -73,7 +73,7 @@ void HelpDialog::licenseClicked(bool checked)
     }
 }
 
-void HelpDialog::aboutQtClicked(bool checked)
+void AboutDialog::aboutQtClicked(bool checked)
 {
     if (checked)
     {
@@ -91,7 +91,7 @@ void HelpDialog::aboutQtClicked(bool checked)
     }
 }
 
-void HelpDialog::fillProgramDetails(QString& string)
+void AboutDialog::fillProgramDetails(QString& string)
 {
     string.replace("$APP_VERSION", APP_VERSION)
             .replace("$QT_VERSION", QT_VERSION_STR)
