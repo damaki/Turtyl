@@ -90,6 +90,12 @@ darkGray    = {r=128, g=128, b=128, a=255}
 lightGray   = {r=192, g=192, b=192, a=255}
 
 -------------------------------------------------------------------------------
+-- Pen cap styles
+flatcap   = 1
+squarecap = 2
+roundcap  = 3
+
+-------------------------------------------------------------------------------
 -- Turtle class.
 --
 -- The turtle class manages the state for a turtle:
@@ -110,6 +116,7 @@ function Turtle.new()
     t.heading       = 0.0 -- turtle heading in radians
     t.thickness     = 1
     t.pendown       = true
+    t.pencap        = roundcap
 
     return t
 end
@@ -123,7 +130,8 @@ function Turtle:forward(distance)
         _ui.canvas.drawline(self.position.x, self.position.y,
                             endpos.x, endpos.y,
                             self.pencolor.r, self.pencolor.g, self.pencolor.b, self.pencolor.a,
-                            self.thickness)
+                            self.thickness,
+                            self.pencap)
     end
 
     self.position = endpos
@@ -153,7 +161,8 @@ function Turtle:arc(angle, xradius, yradius)
                            xradius,
                            yradius,
                            self.pencolor.r, self.pencolor.g, self.pencolor.b, self.pencolor.a,
-                           self.thickness)
+                           self.thickness,
+                           self.pencap)
     end
 end
 
@@ -240,6 +249,16 @@ end
 
 function pencolor()
     return turtle.pencolor.r, turtle.pencolor.g, turtle.pencolor.b, turtle.pencolor.a
+end
+
+function setpencap(cap)
+    assert(type(cap) == "number", "argument to setpencap() must be an integer")
+    assert(cap >= 1 and cap <= 3, "argument to setpencap() must be 1, 2, or 3")
+    turtle.pencap = cap
+end
+
+function pencap()
+   return turtle.pencap
 end
 
 function setscreencolor(r,g,b)

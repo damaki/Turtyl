@@ -22,8 +22,8 @@
 #include <QPen>
 #include <cassert>
 
-static const int DRAW_LINE_ARGS_COUNT = 9;
-static const int DRAW_ARC_ARGS_COUNT = 11;
+static const int DRAW_LINE_ARGS_COUNT = 10;
+static const int DRAW_ARC_ARGS_COUNT = 12;
 static const int SET_BACKGROUND_COLOR_ARGS_COUNT = 3;
 
 static const char* LUA_SCRIPT_RUNNER_NAME = "_turtyl_script_runner";
@@ -83,6 +83,34 @@ static lua_Number getNumber(lua_State* state, int stackPos, const char* funcName
 }
 
 /**
+ * @brief Get an integer from the lua stack, or call lua_error if the stack argument isn't an integer.
+ *
+ * @warning If the value at the specified position on the lua stack is not an integer, then
+ * lua_error is called and this function does not return.
+ *
+ * @param state
+ * @param stackPos The index of the lua stack from where the integer should be read
+ * @param funcName The name of the calling function (as it appears from lua). This is used
+ *    in the error message.
+ * @return The lua integer.
+ */
+static lua_Integer getInteger(lua_State* state, int stackPos, const char* funcName)
+{
+    int isInteger = 0;
+    lua_Number integer = lua_tointegerx(state, stackPos, &isInteger);
+    if (!isInteger)
+    {
+        lua_pushstring(state,
+                       QString("argument %1 to %2 must be an integer")
+                        .arg(stackPos)
+                        .arg(funcName)
+                        .toStdString().c_str());
+        lua_error(state);
+    }
+    return integer;
+}
+
+/**
  * @brief Return a QColor from real RGBA components.
  *
  * If any of the RGBA components are outside the range [0,255] then
@@ -107,6 +135,24 @@ static QColor clippedColor(qreal r, qreal g, qreal b, qreal a)
                   static_cast<int>(std::min(255.0, std::max(0.0, a + 0.5))));
 }
 
+static void setPenCapStyle(QPen& pen, lua_Integer capStyle)
+{
+    switch (capStyle)
+    {
+    case 2:
+        pen.setCapStyle(Qt::FlatCap);
+        break;
+
+    case 3:
+        pen.setCapStyle(Qt::RoundCap);
+        break;
+
+    case 1:
+    default:
+        pen.setCapStyle(Qt::SquareCap);
+
+    }
+}
 
 
 ScriptRunner::ScriptRunner(TurtleCanvasGraphicsItem* const graphicsWidget) :
@@ -441,6 +487,7 @@ int ScriptRunner::drawLine(lua_State* state)
     lua_Number x2,y2;
     lua_Number r,g,b,a;
     lua_Number size;
+    lua_Integer capStyle;
 
     // Check number of arguments
     if (lua_gettop(state) < DRAW_LINE_ARGS_COUNT)
@@ -449,15 +496,16 @@ int ScriptRunner::drawLine(lua_State* state)
         lua_error(state);
     }
 
-    x1   = getNumber(state, 1, "draw_line()");
-    y1   = getNumber(state, 2, "draw_line()");
-    x2   = getNumber(state, 3, "draw_line()");
-    y2   = getNumber(state, 4, "draw_line()");
-    r    = getNumber(state, 5, "draw_line()");
-    g    = getNumber(state, 6, "draw_line()");
-    b    = getNumber(state, 7, "draw_line()");
-    a    = getNumber(state, 8, "draw_line()");
-    size = getNumber(state, 9, "draw_line()");
+    x1       = getNumber (state, 1,  "_ui.drawline()");
+    y1       = getNumber (state, 2,  "_ui.drawline()");
+    x2       = getNumber (state, 3,  "_ui.drawline()");
+    y2       = getNumber (state, 4,  "_ui.drawline()");
+    r        = getNumber (state, 5,  "_ui.drawline()");
+    g        = getNumber (state, 6,  "_ui.drawline()");
+    b        = getNumber (state, 7,  "_ui.drawline()");
+    a        = getNumber (state, 8,  "_ui.drawline()");
+    size     = getNumber (state, 9,  "_ui.drawline()");
+    capStyle = getInteger(state, 10, "_ui.drawline()");
 
     // The bottom-left of the screen as it appears to the user is (0,0)
     // In Qt the top-left is (0,0) so the coordinates from the script are flipped
@@ -465,6 +513,7 @@ int ScriptRunner::drawLine(lua_State* state)
                 x2, -y2);
 
     QPen pen(clippedColor(r,g,b,a), size);
+    setPenCapStyle(pen, capStyle);
 
     getScriptRunner(state).graphicsWidget()->drawLine(line, pen);
 
@@ -485,7 +534,8 @@ int ScriptRunner::drawLine(lua_State* state)
  *   8. The G component of the arc's RGBA color.
  *   9. The B component of the arc's RGBA color.
  *   10. The A component of the arc's RGBA color.
- *   10. The thickness of the arc.
+ *   11. The thickness of the arc.
+ *   12. The pen's cap style.
  *
  * @note If an error occurs then @c lua_error is called and this function does not return.
  *
@@ -501,6 +551,7 @@ int ScriptRunner::drawArc(lua_State* state)
     lua_Number yradius;
     lua_Number r,g,b,a;
     lua_Number size;
+    lua_Integer capStyle;
 
     // Check number of arguments
     if (lua_gettop(state) < DRAW_ARC_ARGS_COUNT)
@@ -509,23 +560,25 @@ int ScriptRunner::drawArc(lua_State* state)
         lua_error(state);
     }
 
-    centerx     = getNumber(state, 1,  "draw_arc()");
-    centery     = getNumber(state, 2,  "draw_arc()");
-    startAngle  = getNumber(state, 3,  "draw_arc()");
-    angle       = getNumber(state, 4,  "draw_arc()");
-    xradius     = getNumber(state, 5,  "draw_arc()");
-    yradius     = getNumber(state, 6,  "draw_arc()");
-    r           = getNumber(state, 7,  "draw_arc()");
-    g           = getNumber(state, 8,  "draw_arc()");
-    b           = getNumber(state, 9,  "draw_arc()");
-    a           = getNumber(state, 10, "draw_arc()");
-    size        = getNumber(state, 11, "draw_arc()");
+    centerx     = getNumber (state, 1,  "_ui.drawarc()");
+    centery     = getNumber (state, 2,  "_ui.drawarc()");
+    startAngle  = getNumber (state, 3,  "_ui.drawarc()");
+    angle       = getNumber (state, 4,  "_ui.drawarc()");
+    xradius     = getNumber (state, 5,  "_ui.drawarc()");
+    yradius     = getNumber (state, 6,  "_ui.drawarc()");
+    r           = getNumber (state, 7,  "_ui.drawarc()");
+    g           = getNumber (state, 8,  "_ui.drawarc()");
+    b           = getNumber (state, 9,  "_ui.drawarc()");
+    a           = getNumber (state, 10, "_ui.drawarc()");
+    size        = getNumber (state, 11, "_ui.drawarc()");
+    capStyle    = getInteger(state, 12, "_ui.drawarc()");
 
     // The bottom-left of the screen as it appears to the user is (0,0)
     // In Qt the top-left is (0,0) so the coordinates from the script are flipped
     QPoint arcCenterPos(centerx, -centery);
 
     QPen pen(clippedColor(r,g,b,a), size);
+    setPenCapStyle(pen, capStyle);
 
     getScriptRunner(state).graphicsWidget()->drawArc(arcCenterPos, startAngle, angle, xradius, yradius, pen);
 

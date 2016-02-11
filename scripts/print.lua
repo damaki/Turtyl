@@ -20,6 +20,10 @@ end
 
 -- Override global print function to redirect messages to the UI
 function print(...)
+
+    -- The UI's print function only takes strings or numbers.
+    -- So we convert each parameter to a string before calling
+    -- _ui.print()
     local msg = nil
     for i, v in vararg(...) do
         s = tostring(v)
