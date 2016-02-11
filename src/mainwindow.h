@@ -63,6 +63,9 @@ private slots:
 
     void saveCanvas();
 
+    void saveScript();
+    void loadScript();
+
 private:
     Ui::MainWindow *ui;
 

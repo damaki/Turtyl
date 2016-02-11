@@ -22,6 +22,7 @@
 #include <QFileDialog>
 #include <QImageWriter>
 #include <QMessageBox>
+#include <QTextStream>
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -58,6 +59,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pauseButton,  SIGNAL(clicked()), this, SLOT(pauseScript()));
     connect(ui->resumeButton, SIGNAL(clicked()), this, SLOT(resumeScript()));
 
+    connect(ui->action_Open_Script, SIGNAL(triggered()), this, SLOT(loadScript()));
+    connect(ui->action_Save_Script, SIGNAL(triggered()), this, SLOT(saveScript()));
     connect(ui->action_Save_Canvas, SIGNAL(triggered()), this, SLOT(saveCanvas()));
     connect(ui->action_Preferences, SIGNAL(triggered()), m_prefsDialog, SLOT(show()));
     connect(ui->action_Preferences, SIGNAL(triggered()), m_prefsDialog, SLOT(loadPreferences()));
@@ -78,8 +81,10 @@ MainWindow::MainWindow(QWidget *parent) :
     m_cmds.start();
 
     //TODO: Make startup scripts configurable.
+    m_cmds.addRequirePath("scripts/?.lua");
     m_cmds.runScriptFile("print.lua");
     m_cmds.runScriptFile("turtle.lua");
+    m_cmds.runScriptFile("stdlib.lua");
 
     // Don't connect this until all the startup scripts have run
     // to prevent the error messages box from being cleared by successful scripts.
@@ -104,7 +109,7 @@ void MainWindow::runScript()
 {
     ui->errorMessagesTextEdit->clear();
 
-    m_cmds.runScript(ui->cmdEdit->document()->toPlainText());
+    m_cmds.runScript(ui->scriptTextEdit->document()->toPlainText());
 
     ui->runButton->setEnabled(false);
     ui->haltButton->setEnabled(true);
@@ -259,6 +264,63 @@ void MainWindow::saveCanvas()
                 QString message = tr("Cannot write to file: ") + filename + '\n'
                                   + writer.errorString();
                 QMessageBox::critical(this, tr("Save Error"), message);
+            }
+        }
+    }
+}
+
+void MainWindow::saveScript()
+{
+    QFileDialog fileDialog(this);
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    fileDialog.setNameFilter(tr("Lua (*.lua);Text (*.txt);All Files (*.*)"));
+    fileDialog.setWindowTitle(tr("Save Script"));
+
+    if (fileDialog.exec() != 0)
+    {
+        const QString script = ui->scriptTextEdit->document()->toPlainText();
+
+        for (QString filename : fileDialog.selectedFiles())
+        {
+            QFile file(filename);
+            if (file.open(QFile::ReadWrite | QFile::Text | QFile::Truncate))
+            {
+                QTextStream stream(&file);
+                stream << script;
+                stream.flush();
+                file.close();
+            }
+            else
+            {
+                QMessageBox::critical(this, tr("Save Error"), file.errorString());
+            }
+        }
+    }
+}
+
+void MainWindow::loadScript()
+{
+    QFileDialog fileDialog(this);
+    fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+    fileDialog.setNameFilter(tr("Lua (*.lua);Text (*.txt);All Files (*.*)"));
+    fileDialog.setWindowTitle(tr("Open Script"));
+
+    if (fileDialog.exec() != 0)
+    {
+        ui->scriptTextEdit->clear();
+
+        for (QString filename : fileDialog.selectedFiles())
+        {
+            QFile file(filename);
+            if (file.open(QFile::ReadOnly | QFile::Text))
+            {
+                QTextStream stream(&file);
+                ui->scriptTextEdit->appendPlainText(stream.readAll());
+                file.close();
+            }
+            else
+            {
+                QMessageBox::critical(this, tr("Open Error"), file.errorString());
             }
         }
     }
