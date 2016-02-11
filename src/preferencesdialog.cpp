@@ -32,14 +32,16 @@ PreferencesDialog::~PreferencesDialog()
     delete ui;
 }
 
-int PreferencesDialog::canvasSize() const
+QSize PreferencesDialog::canvasSize() const
 {
-    return ui->canvasSizeSpinBox->value();
+    return QSize(ui->canvasWidthSpinBox->value(),
+                 ui->canvasHeightSpinBox->value());
 }
 
-void PreferencesDialog::setCanvasSize(int size)
+void PreferencesDialog::setCanvasSize(QSize size)
 {
-    ui->canvasSizeSpinBox->setValue(size);
+    ui->canvasWidthSpinBox->setValue(size.width());
+    ui->canvasHeightSpinBox->setValue(size.height());
 }
 
 bool PreferencesDialog::antialias() const

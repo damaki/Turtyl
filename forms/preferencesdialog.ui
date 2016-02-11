@@ -28,37 +28,53 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Canvas size:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="canvasSizeSpinBox">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="suffix">
-            <string> px</string>
-           </property>
-           <property name="minimum">
-            <number>1</number>
-           </property>
-           <property name="maximum">
-            <number>8192</number>
-           </property>
-           <property name="value">
-            <number>2048</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Canvas</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Width:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="canvasWidthSpinBox">
+            <property name="suffix">
+             <string> px</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>8192</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Height:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="canvasHeightSpinBox">
+            <property name="suffix">
+             <string> px</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>8192</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <widget class="QCheckBox" name="antialiasingCheckBox">

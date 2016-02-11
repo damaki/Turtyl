@@ -37,8 +37,8 @@ public:
     PreferencesDialog(QWidget* parent = 0);
     ~PreferencesDialog();
 
-    int canvasSize() const;
-    void setCanvasSize(int size);
+    QSize canvasSize() const;
+    void setCanvasSize(QSize size);
 
     bool antialias() const;
     void setAntialias(bool on);

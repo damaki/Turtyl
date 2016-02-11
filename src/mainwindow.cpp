@@ -349,12 +349,11 @@ void MainWindow::loadScript()
 void MainWindow::restorePreferences()
 {
     m_prefsDialog->setAntialias(m_turtleGraphics->antialiased());
-    m_prefsDialog->setCanvasSize(m_turtleGraphics->size().width());
+    m_prefsDialog->setCanvasSize(m_turtleGraphics->size());
 }
 
 void MainWindow::applyPreferences()
 {
     m_turtleGraphics->setAntialiased(m_prefsDialog->antialias());
-    m_turtleGraphics->resize(QSize(m_prefsDialog->canvasSize(),
-                                   m_prefsDialog->canvasSize()));
+    m_turtleGraphics->resize(m_prefsDialog->canvasSize());
 }
