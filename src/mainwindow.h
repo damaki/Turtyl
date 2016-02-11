@@ -77,7 +77,7 @@ private:
     ScriptRunner m_cmds;
 
     PreferencesDialog* m_prefsDialog;
-    AboutDialog* m_helpDialog;
+    AboutDialog* m_aboutDialog;
 };
 
 #endif // MAINWINDOW_H

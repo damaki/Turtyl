@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_turtleGraphics(new TurtleCanvasGraphicsItem),
     m_cmds(m_turtleGraphics),
     m_prefsDialog(new PreferencesDialog(this)),
-    m_helpDialog(new AboutDialog(this))
+    m_aboutDialog(new AboutDialog(this))
 {
     ui->setupUi(this);
 
@@ -63,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->action_Save_Script, SIGNAL(triggered()), this, SLOT(saveScript()));
     connect(ui->action_Save_Canvas, SIGNAL(triggered()), this, SLOT(saveCanvas()));
     connect(ui->action_Preferences, SIGNAL(triggered()), m_prefsDialog, SLOT(show()));
-    connect(ui->action_About,       SIGNAL(triggered()), m_helpDialog,  SLOT(show()));
+    connect(ui->action_About,       SIGNAL(triggered()), m_aboutDialog,  SLOT(show()));
 
     connect(ui->action_Errors, SIGNAL(triggered(bool)), this, SLOT(showErrors()));
     connect(ui->action_Script_Output, SIGNAL(triggered(bool)),
