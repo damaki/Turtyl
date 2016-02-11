@@ -297,7 +297,10 @@ void MainWindow::saveScript()
             }
             else
             {
-                QMessageBox::critical(this, tr("Save Error"), file.errorString());
+                QString message = QString("Cannot save file: %1\n%2")
+                        .arg(filename)
+                        .arg(file.errorString());
+                QMessageBox::critical(this, tr("Save Error"), message);
             }
         }
     }
@@ -330,7 +333,10 @@ void MainWindow::loadScript()
             }
             else
             {
-                QMessageBox::critical(this, tr("Open Error"), file.errorString());
+                QString message = QString("Cannot open file: %1\n%2")
+                        .arg(filename)
+                        .arg(file.errorString());
+                QMessageBox::critical(this, tr("Open Error"), message);
             }
         }
     }
