@@ -271,9 +271,14 @@ void MainWindow::saveCanvas()
 
 void MainWindow::saveScript()
 {
+    QStringList filters;
+    filters << tr("Lua (*.lua)")
+            << tr("Text (*.txt)")
+            << tr("All Files (*)");
+
     QFileDialog fileDialog(this);
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setNameFilter(tr("Lua (*.lua);Text (*.txt);All Files (*.*)"));
+    fileDialog.setNameFilters(filters);
     fileDialog.setWindowTitle(tr("Save Script"));
 
     if (fileDialog.exec() != 0)
@@ -300,9 +305,14 @@ void MainWindow::saveScript()
 
 void MainWindow::loadScript()
 {
+    QStringList filters;
+    filters << tr("Lua (*.lua)")
+            << tr("Text (*.txt)")
+            << tr("All Files (*)");
+
     QFileDialog fileDialog(this);
     fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-    fileDialog.setNameFilter(tr("Lua (*.lua);Text (*.txt);All Files (*.*)"));
+    fileDialog.setNameFilters(filters);
     fileDialog.setWindowTitle(tr("Open Script"));
 
     if (fileDialog.exec() != 0)
