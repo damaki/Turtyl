@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_scene(new QGraphicsScene),
     m_turtleGraphics(new TurtleCanvasGraphicsItem),
     m_cmds(m_turtleGraphics),
-    m_prefsDialog(new PreferencesDialog(m_turtleGraphics, this)),
+    m_prefsDialog(new PreferencesDialog(this)),
     m_helpDialog(new HelpDialog(this))
 {
     ui->setupUi(this);
@@ -63,12 +63,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->action_Save_Script, SIGNAL(triggered()), this, SLOT(saveScript()));
     connect(ui->action_Save_Canvas, SIGNAL(triggered()), this, SLOT(saveCanvas()));
     connect(ui->action_Preferences, SIGNAL(triggered()), m_prefsDialog, SLOT(show()));
-    connect(ui->action_Preferences, SIGNAL(triggered()), m_prefsDialog, SLOT(loadPreferences()));
     connect(ui->action_About,       SIGNAL(triggered()), m_helpDialog,  SLOT(show()));
 
     connect(ui->action_Errors, SIGNAL(triggered(bool)), this, SLOT(showErrors()));
     connect(ui->action_Script_Output, SIGNAL(triggered(bool)),
             this, SLOT(showScriptOutputs()));
+
+    connect(m_prefsDialog, SIGNAL(accepted()), this, SLOT(applyPreferences()));
+    connect(m_prefsDialog, SIGNAL(rejected()), this, SLOT(restorePreferences()));
 
     connect(&m_cmds, SIGNAL(scriptError(QString)),
             this,    SLOT(showScriptError(QString)),
@@ -77,6 +79,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&m_cmds, SIGNAL(scriptMessage(QString)),
             this,    SLOT(showScriptOutput(QString)),
             Qt::QueuedConnection);
+
+    restorePreferences();
 
     m_cmds.start();
 
@@ -340,4 +344,16 @@ void MainWindow::loadScript()
             }
         }
     }
+}
+
+void MainWindow::restorePreferences()
+{
+    m_prefsDialog->setAntialias(m_turtleGraphics->antialiased());
+    m_prefsDialog->setCanvasSize(m_turtleGraphics->size());
+}
+
+void MainWindow::applyPreferences()
+{
+    m_turtleGraphics->setAntialiased(m_prefsDialog->antialias());
+    m_turtleGraphics->resize(m_prefsDialog->canvasSize());
 }

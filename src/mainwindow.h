@@ -66,6 +66,9 @@ private slots:
     void saveScript();
     void loadScript();
 
+    void restorePreferences();
+    void applyPreferences();
+
 private:
     Ui::MainWindow *ui;
 

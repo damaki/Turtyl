@@ -23,7 +23,6 @@
 #include <QCheckBox>
 #include <QDialog>
 #include <QSpinBox>
-#include "turtlecanvasgraphicsitem.h"
 
 namespace Ui
 {
@@ -35,23 +34,23 @@ class PreferencesDialog : public QDialog
     Q_OBJECT
 
 public:
-    PreferencesDialog(TurtleCanvasGraphicsItem* graphicsWidget, QWidget* parent = 0);
+    PreferencesDialog(QWidget* parent = 0);
     ~PreferencesDialog();
 
     int canvasSize() const;
+    void setCanvasSize(int size);
+
     bool antialias() const;
+    void setAntialias(bool on);
 
     bool autoShowScriptErrors() const;
-    bool autoShowScriptOutput() const;
+    void setAutoShowScriptErrors(bool on);
 
-public slots:
-    void loadPreferences();
-    void applyPreferences();
+    bool autoShowScriptOutput() const;
+    void setAutoShowScriptOutput(bool on);
 
 private:
     Ui::PreferencesDialog* ui;
-
-    TurtleCanvasGraphicsItem* m_graphicsWidget;
 };
 
 #endif // PREFERENCESDIALOG_H

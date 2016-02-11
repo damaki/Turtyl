@@ -20,15 +20,11 @@
 #include "preferencesdialog.h"
 #include "ui_preferencesdialog.h"
 
-PreferencesDialog::PreferencesDialog(TurtleCanvasGraphicsItem* const graphicsWidget,
-                                     QWidget* const parent) :
+PreferencesDialog::PreferencesDialog(QWidget* const parent) :
     QDialog(parent),
-    ui(new Ui::PreferencesDialog),
-    m_graphicsWidget(graphicsWidget)
+    ui(new Ui::PreferencesDialog)
 {
     ui->setupUi(this);
-
-    connect(this, SIGNAL(accepted()), this, SLOT(applyPreferences()));
 }
 
 PreferencesDialog::~PreferencesDialog()
@@ -41,9 +37,19 @@ int PreferencesDialog::canvasSize() const
     return ui->canvasSizeSpinBox->value();
 }
 
+void PreferencesDialog::setCanvasSize(int size)
+{
+    ui->canvasSizeSpinBox->setValue(size);
+}
+
 bool PreferencesDialog::antialias() const
 {
     return ui->antialiasingCheckBox->checkState() == Qt::Checked;
+}
+
+void PreferencesDialog::setAntialias(bool on)
+{
+    ui->antialiasingCheckBox->setChecked(on);
 }
 
 bool PreferencesDialog::autoShowScriptErrors() const
@@ -51,27 +57,17 @@ bool PreferencesDialog::autoShowScriptErrors() const
     return ui->autoShowErrorsCheckBox->checkState() == Qt::Checked;
 }
 
+void PreferencesDialog::setAutoShowScriptErrors(bool on)
+{
+    ui->autoShowErrorsCheckBox->setChecked(on);
+}
+
 bool PreferencesDialog::autoShowScriptOutput() const
 {
     return ui->autoShowOutputCheckBox->checkState() == Qt::Checked;
 }
 
-void PreferencesDialog::loadPreferences()
+void PreferencesDialog::setAutoShowScriptOutput(bool on)
 {
-    if (NULL != m_graphicsWidget)
-    {
-        ui->antialiasingCheckBox->setChecked(m_graphicsWidget->antialiased());
-        ui->canvasSizeSpinBox->setValue(m_graphicsWidget->boundingRect().width());
-    }
-}
-
-void PreferencesDialog::applyPreferences()
-{
-    if (NULL != m_graphicsWidget)
-    {
-        m_graphicsWidget->setAntialiased(ui->antialiasingCheckBox->checkState() == Qt::Checked);
-
-        const int newSize = ui->canvasSizeSpinBox->value();
-        m_graphicsWidget->resize(newSize);
-    }
+    ui->autoShowOutputCheckBox->setChecked(on);
 }
