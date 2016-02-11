@@ -283,10 +283,10 @@ void TurtleCanvasGraphicsItem::drawArc(const QPointF &centerPos,
  *
  * @return The canvas size.
  */
-int TurtleCanvasGraphicsItem::size() const
+QSize TurtleCanvasGraphicsItem::size() const
 {
     QMutexLocker lock(&m_mutex);
-    return m_pixmap.width();
+    return m_pixmap.size();
 }
 
 /**
@@ -297,35 +297,27 @@ int TurtleCanvasGraphicsItem::size() const
  * @param newSize The size (in pixels) of the new canvas. If the size is the same
  *     as the current size then this method has no effect.
  */
-void TurtleCanvasGraphicsItem::resize(int newSize)
+void TurtleCanvasGraphicsItem::resize(QSize newSize)
 {
     bool wasResized = false;
 
     {
         QMutexLocker lock(&m_mutex);
 
-        int oldSize = m_pixmap.width();
+        const QSize oldSize = m_pixmap.size();
 
         if (newSize != oldSize)
         {
             prepareGeometryChange();
 
-            QPixmap newpixmap(newSize, newSize);
+            QPixmap newpixmap(newSize);
             newpixmap.fill(Qt::transparent);
 
             QPainter painter(&newpixmap);
-            int offset;
 
-            if (newSize > oldSize)
-            {
-                offset = (newSize - oldSize) / 2;
-            }
-            else
-            {
-                offset = -((oldSize - newSize) / 2);
-            }
-
-            painter.drawPixmap(QPoint(offset, offset),
+            int xoffset = (newSize.width() - oldSize.width()) / 2;
+            int yoffset = (newSize.height() - oldSize.height()) / 2;
+            painter.drawPixmap(QPoint(xoffset, yoffset),
                                m_pixmap,
                                m_pixmap.rect());
 
@@ -333,8 +325,8 @@ void TurtleCanvasGraphicsItem::resize(int newSize)
 
             update();
 
-            const qreal newpos = static_cast<qreal>(newSize) / 2.0;
-            setPos(-newpos, -newpos);
+            setPos(-static_cast<qreal>(newSize.width()) / 2.0,
+                   -static_cast<qreal>(newSize.height()) / 2.0);
 
             wasResized = true;
         }

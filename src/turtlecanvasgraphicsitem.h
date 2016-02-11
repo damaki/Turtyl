@@ -111,8 +111,8 @@ public:
                  qreal yradius,
                  const QPen& pen);
 
-    int size() const;
-    void resize(int newSize);
+    QSize size() const;
+    void resize(QSize newSize);
 
     virtual QRectF boundingRect() const;
 
