@@ -74,4 +74,6 @@ OTHER_FILES += \
     scripts/turtle.lua
 
 DISTFILES += \
-    scripts/print.lua
+    scripts/print.lua \
+    scripts/shapes.lua \
+    scripts/stdlib.lua
