@@ -282,6 +282,13 @@ void TurtleCanvasGraphicsItem::drawArc(const QPointF &centerPos,
 
         painter.drawArc(boundingBox, 0, angleInt);
 
+        // Map boundingBox from local coordinates to global coordinates.
+        // Note that QMartrix::mapRect() returns the bounding rectangle
+        // of the mapped rectangle (if rotations are applied), which is
+        // exactly what we want.
+        QMatrix worldMatrix = painter.worldMatrix();
+        boundingBox = worldMatrix.mapRect(boundingBox);
+
         updateUsedArea(boundingBox.topLeft());
         updateUsedArea(boundingBox.topRight());
         updateUsedArea(boundingBox.bottomLeft());
