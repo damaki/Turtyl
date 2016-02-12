@@ -420,6 +420,20 @@ void ScriptRunner::run()
  */
 void ScriptRunner::setupCommands(lua_State* state)
 {
+    static const luaL_Reg uiTableFuncs[] =
+    {
+        "print", &ScriptRunner::printMessage
+    };
+
+    static const luaL_Reg canvasTableFuncs[] =
+    {
+        "drawline",           &ScriptRunner::drawLine,
+        "drawarc",            &ScriptRunner::drawArc,
+        "clear",              &ScriptRunner::clearScreen,
+        "setbackgroundcolor", &ScriptRunner::setBackgroundColor,
+        "getbackgroundcolor", &ScriptRunner::getBackgroundColor
+    };
+
     lua_settop(state, 0); // ensure empty stack
 
     // Add ourself to the script so that we can retrieve our
@@ -427,41 +441,10 @@ void ScriptRunner::setupCommands(lua_State* state)
     lua_pushlightuserdata(state, this);
     lua_setglobal(state, LUA_SCRIPT_RUNNER_NAME);
 
-    // Create the _ui table with the following functions:
-    //   _ui.print
-    //   _ui.canvas.drawline
-    //   _ui.canvas.drawarc
-    //   _ui.canvas.clears
-    //   _ui.canvas.setbackgroundcolor
-    //   _ui.canvas.backgroundcolor
-    lua_createtable(state, 0, 2);
-
-    lua_pushliteral(state, "print");
-    lua_pushcfunction(state, &ScriptRunner::printMessage);
-    lua_rawset(state, 1);
+    luaL_newlib(state, uiTableFuncs);
 
     lua_pushliteral(state, "canvas");
-    lua_createtable(state, 0, 6);
-
-    lua_pushliteral(state, "drawline");
-    lua_pushcfunction(state, &ScriptRunner::drawLine);
-    lua_rawset(state, 3);
-
-    lua_pushliteral(state, "drawarc");
-    lua_pushcfunction(state, &ScriptRunner::drawArc);
-    lua_rawset(state, 3);
-
-    lua_pushliteral(state, "clear");
-    lua_pushcfunction(state, &ScriptRunner::clearScreen);
-    lua_rawset(state, 3);
-
-    lua_pushliteral(state, "setbackgroundcolor");
-    lua_pushcfunction(state, &ScriptRunner::setBackgroundColor);
-    lua_rawset(state, 3);
-
-    lua_pushliteral(state, "backgroundcolor");
-    lua_pushcfunction(state, &ScriptRunner::getBackgroundColor);
-    lua_rawset(state, 3);
+    luaL_newlib(state, canvasTableFuncs);
 
     lua_rawset(state, 1); // _ui['canvas'] = canvas
 
