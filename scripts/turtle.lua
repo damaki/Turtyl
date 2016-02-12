@@ -299,8 +299,8 @@ function screencolor()
 end
 
 function home()
-    turtle.position = {x=0.0, y=0.0}
-    turtle.heading  = 0.0
+    setpos(0,0)
+    setorientation(0)
 end
 
 function circle(radius)
