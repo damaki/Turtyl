@@ -19,6 +19,7 @@
  ***********************************************************************/
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
+#include "lua.hpp"
 
 AboutDialog::AboutDialog(QWidget *parent) :
     QDialog(parent),
@@ -95,6 +96,7 @@ void AboutDialog::fillProgramDetails(QString& string)
 {
     string.replace("$APP_VERSION", APP_VERSION)
             .replace("$QT_VERSION", QT_VERSION_STR)
+            .replace("$LUA_COPYRIGHT", LUA_COPYRIGHT)
             .replace("$BUILD_DATE", __DATE__)
             .replace("$BUILD_TIME", __TIME__);
 }
