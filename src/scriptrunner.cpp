@@ -165,7 +165,8 @@ ScriptRunner::ScriptRunner(TurtleCanvasGraphicsItem* const graphicsWidget) :
     m_pauseMutex(),
     m_pause(false),
     m_haltMutex(),
-    m_halt(false)
+    m_halt(false),
+    m_scriptMessagePending(false)
 {
     assert(NULL != m_state);
     assert(NULL != graphicsWidget);
@@ -235,6 +236,11 @@ void ScriptRunner::haltScript()
         QMutexLocker lock(&m_haltMutex);
         m_halt = true;
     }
+
+    // The script might be waiting to send a message.
+    // If so, then wake it up, so that it can detect the halt request.
+    // (see emitMessage())
+    m_scriptMessageCond.wakeAll();
 
     // The command might currently be paused.
     resumeScript();
@@ -343,9 +349,50 @@ bool ScriptRunner::haltRequested() const
     return m_halt;
 }
 
-void ScriptRunner::printMessage(const QString& message)
+void ScriptRunner::emitMessage(const QString& message)
 {
-    emit scriptMessage(message);
+    QMutexLocker lock(&m_scriptMessageMutex);
+
+    // If the UI hasn't yet read the previous message then wait for the UI to
+    // catch up before sending the next one to avoid overloading the UI.
+    while ((!haltRequested()) && m_scriptMessagePending)
+    {
+        m_scriptMessageCond.wait(&m_scriptMessageMutex);
+    }
+
+    // Don't do anything if the script needs to halt.
+    if (!haltRequested())
+    {
+        m_scriptMessage = message;
+        m_scriptMessagePending = true;
+
+        emit scriptMessageReceived();
+    }
+}
+
+/**
+ * @brief Get all pending messages printed by the script.
+ *
+ * @return A queue containing each individual message printed by the script.
+ */
+QString ScriptRunner::pendingScriptMessage()
+{
+    QString message;
+
+    QMutexLocker lock(&m_scriptMessageMutex);
+    message.swap(m_scriptMessage);
+    m_scriptMessagePending = false;
+    m_scriptMessageCond.wakeAll();
+
+    return message;
+}
+
+void ScriptRunner::clearPendingScriptMessage()
+{
+    QMutexLocker lock(&m_scriptMessageMutex);
+    m_scriptMessage.clear();
+    m_scriptMessagePending = false;
+    m_scriptMessageCond.wakeAll();
 }
 
 void ScriptRunner::run()
@@ -507,7 +554,7 @@ void ScriptRunner::setupCommands(lua_State* state)
 {
     static const luaL_Reg uiTableFuncs[] =
     {
-        "print", &ScriptRunner::printMessage
+        "print", &ScriptRunner::emitMessage
     };
 
     static const luaL_Reg canvasTableFuncs[] =
@@ -732,7 +779,7 @@ int ScriptRunner::getBackgroundColor(lua_State* state)
     return 3;
 }
 
-int ScriptRunner::printMessage(lua_State* state)
+int ScriptRunner::emitMessage(lua_State* state)
 {
     QString message;
 
@@ -746,7 +793,7 @@ int ScriptRunner::printMessage(lua_State* state)
         }
     }
 
-    getScriptRunner(state).printMessage(message);
+    getScriptRunner(state).emitMessage(message);
 
     return 0;
 }

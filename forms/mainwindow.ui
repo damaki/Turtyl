@@ -118,7 +118,7 @@
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="errorsTab">
         <attribute name="title">
@@ -147,14 +147,25 @@
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QPlainTextEdit" name="scriptMessagesTextEdit">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
+           <property name="font">
+            <font>
+             <family>Courier 10 Pitch</family>
+            </font>
+           </property>
+           <property name="lineWrapMode">
+            <enum>QPlainTextEdit::NoWrap</enum>
            </property>
            <property name="readOnly">
             <bool>true</bool>
+           </property>
+           <property name="maximumBlockCount">
+            <number>10000</number>
+           </property>
+           <property name="backgroundVisible">
+            <bool>false</bool>
+           </property>
+           <property name="centerOnScroll">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -371,22 +382,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>clearOutputButton</sender>
-   <signal>clicked()</signal>
-   <receiver>scriptMessagesTextEdit</receiver>
-   <slot>clear()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>63</x>
-     <y>543</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>399</x>
-     <y>471</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionShow_Script</sender>
    <signal>triggered(bool)</signal>
    <receiver>scriptDockWidget</receiver>
@@ -415,6 +410,22 @@
     <hint type="destinationlabel">
      <x>-1</x>
      <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearOutputButton</sender>
+   <signal>clicked()</signal>
+   <receiver>scriptMessagesTextEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>63</x>
+     <y>543</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>156</x>
+     <y>483</y>
     </hint>
    </hints>
   </connection>

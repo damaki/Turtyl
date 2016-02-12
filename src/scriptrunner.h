@@ -54,19 +54,29 @@ public:
 
     void runScriptFile(const QString& filename);
 
-    bool haltRequested() const;
-    void printMessage(const QString& message);
+    QString pendingScriptMessage();
+    void clearPendingScriptMessage();
 
 signals:
     void scriptFinished(bool hasErrors);
     void scriptError(const QString& message);
 
-    void scriptMessage(const QString& message);
+    /**
+     * @brief Emitted when the script has printed a message.
+     *
+     * The message is stored internally in a queue of all pending messages.
+     *
+     * The messages can be read by calling pendingScriptMessages().
+     */
+    void scriptMessageReceived();
 
 protected:
     virtual void run();
 
 private:
+    bool haltRequested() const;
+    void emitMessage(const QString& message);
+
     void openRestrictedBaseModule();
     void openRestrictedOsModule();
 
@@ -79,7 +89,7 @@ private:
     static int clearScreen(lua_State* state);
     static int setBackgroundColor(lua_State* state);
     static int getBackgroundColor(lua_State* state);
-    static int printMessage(lua_State* state);
+    static int emitMessage(lua_State* state);
 
     static void debugHookEntry(lua_State* state, lua_Debug* );
 
@@ -99,6 +109,11 @@ private:
 
     mutable QMutex m_haltMutex;
     volatile bool m_halt;
+
+    QMutex m_scriptMessageMutex;
+    QWaitCondition m_scriptMessageCond;
+    QString m_scriptMessage;
+    volatile bool m_scriptMessagePending;
 };
 
 #endif // COMMANDRUNNER_H

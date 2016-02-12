@@ -77,8 +77,8 @@ MainWindow::MainWindow(QWidget *parent) :
             this,    SLOT(showScriptError(QString)),
             Qt::QueuedConnection);
 
-    connect(&m_cmds, SIGNAL(scriptMessage(QString)),
-            this,    SLOT(showScriptOutput(QString)),
+    connect(&m_cmds, SIGNAL(scriptMessageReceived()),
+            this,    SLOT(showScriptOutput()),
             Qt::QueuedConnection);
 
     restorePreferences();
@@ -132,9 +132,9 @@ void MainWindow::showScriptError(const QString& message)
     }
 }
 
-void MainWindow::showScriptOutput(const QString& message)
+void MainWindow::showScriptOutput()
 {
-    ui->scriptMessagesTextEdit->appendPlainText(message);
+    ui->scriptMessagesTextEdit->appendPlainText(m_cmds.pendingScriptMessage());
 
     if (m_prefsDialog->autoShowScriptOutput())
     {

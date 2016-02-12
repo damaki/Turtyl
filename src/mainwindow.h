@@ -50,7 +50,7 @@ private slots:
     void runScript();
 
     void showScriptError(const QString& message);
-    void showScriptOutput(const QString& message);
+    void showScriptOutput();
     void scriptFinished(bool hasErrors);
 
     void pauseScript();
