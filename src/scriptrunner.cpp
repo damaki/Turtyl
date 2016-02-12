@@ -608,7 +608,6 @@ void ScriptRunner::debugHook(lua_State* state)
     if (haltRequested())
     {
         // Stop the script
-        lua_pushstring(state, "halted");
         lua_error(state);
     }
 }
