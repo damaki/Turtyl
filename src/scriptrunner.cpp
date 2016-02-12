@@ -166,6 +166,9 @@ ScriptRunner::ScriptRunner(TurtleCanvasGraphicsItem* const graphicsWidget) :
     m_pause(false),
     m_haltMutex(),
     m_halt(false),
+    m_scriptMessageMutex(QMutex::Recursive),
+    m_scriptMessageCond(),
+    m_scriptMessage(),
     m_scriptMessagePending(false)
 {
     assert(NULL != m_state);
@@ -554,7 +557,7 @@ void ScriptRunner::setupCommands(lua_State* state)
 {
     static const luaL_Reg uiTableFuncs[] =
     {
-        "print", &ScriptRunner::emitMessage
+        "print", &ScriptRunner::printMessage
     };
 
     static const luaL_Reg canvasTableFuncs[] =
@@ -563,7 +566,12 @@ void ScriptRunner::setupCommands(lua_State* state)
         "drawarc",            &ScriptRunner::drawArc,
         "clear",              &ScriptRunner::clearScreen,
         "setbackgroundcolor", &ScriptRunner::setBackgroundColor,
-        "getbackgroundcolor", &ScriptRunner::getBackgroundColor
+        "getbackgroundcolor", &ScriptRunner::getBackgroundColor,
+        "setturtle",          &ScriptRunner::setTurtle,
+        "getturtle",          &ScriptRunner::getTurtle,
+        "showturtle",         &ScriptRunner::showTurtle,
+        "hideturtle",         &ScriptRunner::hideTurtle,
+        "turtlehidden",       &ScriptRunner::turtleHidden
     };
 
     lua_settop(state, 0); // ensure empty stack
@@ -779,7 +787,81 @@ int ScriptRunner::getBackgroundColor(lua_State* state)
     return 3;
 }
 
-int ScriptRunner::emitMessage(lua_State* state)
+int ScriptRunner::setTurtle(lua_State* state)
+{
+    lua_Number x,y;
+    lua_Number heading;
+    lua_Number r,g,b,a;
+
+    // Check number of arguments
+    if (lua_gettop(state) < SET_BACKGROUND_COLOR_ARGS_COUNT)
+    {
+        lua_pushstring(state, "too few arguments to bgcolor()");
+        lua_error(state);
+    }
+
+    // Read each argument from the Lua stack
+    x       = getNumber(state, 1, "_ui.setturtle()");
+    y       = getNumber(state, 2, "_ui.setturtle()");
+    heading = getNumber(state, 3, "_ui.setturtle()");
+    r       = getNumber(state, 4, "_ui.setturtle()");
+    g       = getNumber(state, 5, "_ui.setturtle()");
+    b       = getNumber(state, 6, "_ui.setturtle()");
+    a       = getNumber(state, 7, "_ui.setturtle()");
+
+    QPointF pos(x,y);
+    QColor color(clippedColor(r,g,b,a));
+
+    getScriptRunner(state).graphicsWidget()->setTurtle(pos, heading, color);
+
+    return 0;
+}
+
+int ScriptRunner::getTurtle(lua_State* state)
+{
+    // Clear the stack
+    lua_pop(state, lua_gettop(state));
+
+    QPointF pos;
+    qreal heading;
+    QColor color;
+
+    getScriptRunner(state).graphicsWidget()->getTurtle(pos, heading, color);
+
+    lua_pushnumber(state,  pos.x());
+    lua_pushnumber(state,  pos.y());
+    lua_pushnumber(state,  heading);
+    lua_pushinteger(state, color.red());
+    lua_pushinteger(state, color.green());
+    lua_pushinteger(state, color.blue());
+    lua_pushinteger(state, color.alpha());
+
+    return 7;
+}
+
+int ScriptRunner::showTurtle(lua_State* state)
+{
+    getScriptRunner(state).graphicsWidget()->showTurtle();
+    return 0;
+}
+
+int ScriptRunner::hideTurtle(lua_State* state)
+{
+    getScriptRunner(state).graphicsWidget()->hideTurtle();
+
+    return 0;
+}
+
+int ScriptRunner::turtleHidden(lua_State* state)
+{
+    const bool hidden = getScriptRunner(state).graphicsWidget()->turtleHidden();
+
+    lua_pushboolean(state, hidden ? 1 : 0);
+
+    return 1;
+}
+
+int ScriptRunner::printMessage(lua_State* state)
 {
     QString message;
 

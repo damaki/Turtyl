@@ -101,6 +101,18 @@ public:
     QColor backgroundColor() const;
     void setBackgroundColor(const QColor& color);
 
+    void setTurtle(const QPointF& position,
+                   qreal heading,
+                   const QColor& color);
+
+    void getTurtle(QPointF& position,
+                   qreal& heading,
+                   QColor& color) const;
+
+    void showTurtle();
+    void hideTurtle();
+    bool turtleHidden();
+
     void clear();
 
     void drawLine(QLineF line, const QPen& pen);
@@ -136,6 +148,11 @@ private:
     QColor m_backgroundColor;
 
     QRect m_usedRect;
+
+    QPointF m_turtlePos;
+    qreal m_turtleHeading;
+    QColor m_turtleColor;
+    bool m_turtleHidden;
 
     bool m_antialiased;
 };

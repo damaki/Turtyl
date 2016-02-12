@@ -33,6 +33,10 @@ TurtleCanvasGraphicsItem::TurtleCanvasGraphicsItem() :
     m_pixmap(DEFAULT_SIZE, DEFAULT_SIZE),
     m_backgroundColor(Qt::white),
     m_usedRect(DEFAULT_SIZE/2,DEFAULT_SIZE/2,1,1),
+    m_turtlePos(0.0, 0.0),
+    m_turtleHeading(0.0),
+    m_turtleColor(Qt::black),
+    m_turtleHidden(false),
     m_antialiased(false)
 {
     // We need to call update() each time the canvas is updated (i.e. drawn on)
@@ -115,6 +119,80 @@ void TurtleCanvasGraphicsItem::setBackgroundColor(const QColor& color)
     }
 
     emit canvasUpdated();
+}
+
+/**
+ * @brief Set the properties of the on-screen turtle.
+ *
+ * @param position The turtle's position on the screen.
+ * @param heading The turtle's heading/direction.
+ * @param color The color of the turtle.
+ */
+void TurtleCanvasGraphicsItem::setTurtle(const QPointF& position,
+                                         qreal heading,
+                                         const QColor& color)
+{
+    {
+        QMutexLocker lock(&m_mutex);
+        m_turtlePos     = position;
+        m_turtleHeading = heading;
+        m_turtleColor   = color;
+    }
+
+    emit canvasUpdated();
+}
+
+/**
+ * @brief Gets the properties of the on-screen turtle.
+ *
+ * @param position The turtle's last set position.
+ * @param heading The turtle's last set heading/direction.
+ * @param color The turtle's last set color.
+ */
+void TurtleCanvasGraphicsItem::getTurtle(QPointF& position,
+                                         qreal& heading,
+                                         QColor& color) const
+{
+    QMutexLocker lock(&m_mutex);
+    position = m_turtlePos;
+    heading  = m_turtleHeading;
+    color    = m_turtleColor;
+}
+
+/**
+ * @brief Make the on-screen turtle visible.
+ */
+void TurtleCanvasGraphicsItem::showTurtle()
+{
+    {
+        QMutexLocker lock(&m_mutex);
+        m_turtleHidden = false;
+    }
+
+    emit canvasUpdated();
+}
+
+/**
+ * @brief Hide the on-screen turtle.
+ */
+void TurtleCanvasGraphicsItem::hideTurtle()
+{
+    {
+        QMutexLocker lock(&m_mutex);
+        m_turtleHidden = true;
+    }
+
+    emit canvasUpdated();
+}
+
+/**
+ * @brief Get whether or not the on-screen turtle is currently hidden.
+ * @return
+ */
+bool TurtleCanvasGraphicsItem::turtleHidden()
+{
+    QMutexLocker lock(&m_mutex);
+    return m_turtleHidden;
 }
 
 /**
@@ -367,9 +445,31 @@ void TurtleCanvasGraphicsItem::paint(QPainter *painter,
                                const QStyleOptionGraphicsItem *,
                                QWidget *)
 {
+    static const QPointF turtlePoints[] =
+    {
+        QPointF(-10.0,  0.5),
+        QPointF( 10.0,  0.5),
+        QPointF(  0.0, -10.5)
+    };
+
     QMutexLocker lock(&m_mutex);
     painter->fillRect(boundingRect(), m_backgroundColor);
     painter->drawPixmap(boundingRect(), m_pixmap, m_pixmap.rect());
+
+    // Paint the turtle
+    if (!m_turtleHidden)
+    {
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        painter->translate(static_cast<qreal>(m_pixmap.width())  / 2.0,
+                           static_cast<qreal>(m_pixmap.height()) / 2.0);
+        painter->translate(QPointF(m_turtlePos.x(),
+                                   -m_turtlePos.y()));
+        painter->rotate(m_turtleHeading);
+        painter->setPen(m_turtleColor);
+
+        painter->drawPolygon(&turtlePoints[0],
+                             sizeof(turtlePoints)/sizeof(turtlePoints[0]));
+    }
 }
 
 /**

@@ -31,7 +31,16 @@
  * @brief Runs commands from Lua scripts.
  *
  * Errors produced when either loading/compiling or running a script
- * produce an error message via the @c commandError() signal.
+ * produce an error message via the @c scriptError(QString) signal.
+ *
+ * @section Script Messages
+ *
+ * Scripts can call the @c _ui.print() message to print strings. When
+ * a script calls @c _ui.print() the scriptMessageReceived() signal
+ * is emitted.
+ *
+ * After the @c scriptMessageReceived() signal has been emitted
+ * pendingScriptMessage() must be called to read the message.
  */
 class ScriptRunner : public QThread
 {
@@ -89,7 +98,12 @@ private:
     static int clearScreen(lua_State* state);
     static int setBackgroundColor(lua_State* state);
     static int getBackgroundColor(lua_State* state);
-    static int emitMessage(lua_State* state);
+    static int setTurtle(lua_State* state);
+    static int getTurtle(lua_State* state);
+    static int showTurtle(lua_State* state);
+    static int hideTurtle(lua_State* state);
+    static int turtleHidden(lua_State* state);
+    static int printMessage(lua_State* state);
 
     static void debugHookEntry(lua_State* state, lua_Debug* );
 

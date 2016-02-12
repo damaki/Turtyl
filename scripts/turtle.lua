@@ -121,6 +121,16 @@ function Turtle.new()
     return t
 end
 
+function Turtle:updateui()
+    _ui.canvas.setturtle(self.position.x,
+                         self.position.y,
+                         math.deg(self.heading),
+                         self.pencolor.r,
+                         self.pencolor.g,
+                         self.pencolor.b,
+                         self.pencolor.a);
+end
+
 function Turtle:forward(distance)
     local endpos = {}
     endpos.x = self.position.x + (distance * math.sin(self.heading))
@@ -135,6 +145,8 @@ function Turtle:forward(distance)
     end
 
     self.position = endpos
+
+    self:updateui();
 end
 
 function Turtle:backward(distance)
@@ -143,6 +155,8 @@ end
 
 function Turtle:right(degrees)
     self.heading = self.heading + math.rad(degrees)
+
+    self:updateui();
 end
 
 function Turtle:left(degrees)
@@ -169,6 +183,20 @@ end
 function Turtle:setpos(x,y)
     local pos = {x=x, y=y}
     self.position = pos
+
+    self:updateui();
+end
+
+function Turtle:setorientation(degrees)
+    self.heading = math.rad(degrees)
+
+    self:updateui();
+end
+
+function Turtle:setpencolor(r,g,b,a)
+    self.pencolor = parsecolor(r,g,b,a)
+
+    self:updateui();
 end
 
 local turtle = Turtle.new()
@@ -206,7 +234,7 @@ end
 
 function setorientation(degrees)
     assert(type(degrees) == "number", "argument to setorientation() must be a number")
-    turtle.heading = math.rad(degrees)
+    turtle:setorientation(degrees)
 end
 
 function orientation()
@@ -244,7 +272,7 @@ function pensize()
 end
 
 function setpencolor(r,g,b,a)
-    turtle.pencolor = parsecolor(r,g,b,a)
+    turtle:setpencolor(r,g,b,a)
 end
 
 function pencolor()
