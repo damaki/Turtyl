@@ -119,6 +119,10 @@ void MainWindow::runScript()
     ui->runButton->setEnabled(false);
     ui->haltButton->setEnabled(true);
     ui->pauseButton->setEnabled(true);
+
+    ui->action_Run->setEnabled(false);
+    ui->action_Halt->setEnabled(true);
+    ui->action_Pause->setEnabled(true);
 }
 
 void MainWindow::showScriptError(const QString& message)
@@ -155,6 +159,10 @@ void MainWindow::scriptFinished(bool hasErrors)
     ui->pauseButton->setEnabled(false);
     ui->resumeButton->setEnabled(false);
 
+    ui->action_Run->setEnabled(true);
+    ui->action_Halt->setEnabled(false);
+    ui->action_Pause->setEnabled(false);
+
     if (!hasErrors)
     {
         ui->errorMessagesTextEdit->clear();
@@ -169,6 +177,9 @@ void MainWindow::pauseScript()
     ui->pauseButton->setEnabled(false);
     ui->resumeButton->setEnabled(true);
 
+    ui->action_Pause->setEnabled(false);
+    ui->action_Run->setEnabled(true);
+
     m_cmds.pauseScript();
 }
 
@@ -179,6 +190,9 @@ void MainWindow::resumeScript()
 {
     ui->pauseButton->setEnabled(true);
     ui->resumeButton->setEnabled(false);
+
+    ui->action_Pause->setEnabled(true);
+    ui->action_Run->setEnabled(false);
 
     m_cmds.resumeScript();
 }
@@ -192,6 +206,10 @@ void MainWindow::haltScript()
     ui->haltButton->setEnabled(false);
     ui->pauseButton->setEnabled(false);
     ui->resumeButton->setEnabled(false);
+
+    ui->action_Run->setEnabled(false);
+    ui->action_Halt->setEnabled(false);
+    ui->action_Pause->setEnabled(false);
 
     m_cmds.haltScript();
 }

@@ -21,7 +21,7 @@
     <item>
      <widget class="QGraphicsView" name="graphicsView">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -82,8 +82,17 @@
     <addaction name="menu_Output_Panes"/>
     <addaction name="actionShow_Script"/>
    </widget>
+   <widget class="QMenu" name="menu_Script">
+    <property name="title">
+     <string>&amp;Script</string>
+    </property>
+    <addaction name="action_Run"/>
+    <addaction name="action_Pause"/>
+    <addaction name="action_Halt"/>
+   </widget>
    <addaction name="menuLuogo"/>
    <addaction name="menu_Edit"/>
+   <addaction name="menu_Script"/>
    <addaction name="menu_View"/>
    <addaction name="menu_Help"/>
   </widget>
@@ -118,7 +127,7 @@
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="errorsTab">
         <attribute name="title">
@@ -147,6 +156,12 @@
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QPlainTextEdit" name="scriptMessagesTextEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="font">
             <font>
              <family>Courier 10 Pitch</family>
@@ -235,7 +250,7 @@
         </font>
        </property>
        <property name="tabChangesFocus">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="backgroundVisible">
         <bool>false</bool>
@@ -361,6 +376,38 @@
     <string>Ctrl+S</string>
    </property>
   </action>
+  <action name="action_Run">
+   <property name="text">
+    <string>&amp;Run/Resume</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="action_Pause">
+   <property name="text">
+    <string>&amp;Pause</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionResu_me">
+   <property name="text">
+    <string>Resu&amp;me</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="action_Halt">
+   <property name="text">
+    <string>&amp;Halt</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
@@ -426,6 +473,70 @@
     <hint type="destinationlabel">
      <x>156</x>
      <y>483</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Run</sender>
+   <signal>triggered()</signal>
+   <receiver>runButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>655</x>
+     <y>486</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Run</sender>
+   <signal>triggered()</signal>
+   <receiver>resumeButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>747</x>
+     <y>486</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Pause</sender>
+   <signal>triggered()</signal>
+   <receiver>pauseButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>747</x>
+     <y>429</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Halt</sender>
+   <signal>triggered()</signal>
+   <receiver>haltButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>747</x>
+     <y>542</y>
     </hint>
    </hints>
   </connection>
