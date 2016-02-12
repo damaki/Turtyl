@@ -170,7 +170,7 @@ ScriptRunner::ScriptRunner(TurtleCanvasGraphicsItem* const graphicsWidget) :
     assert(NULL != m_state);
     assert(NULL != graphicsWidget);
 
-    // Load all libraries except io, os, and debug.
+    // Load all libraries except io and debug.
     // These libraries are omitted for security.
     luaL_requiref(m_state, "_G",        &luaopen_base,      1);
     luaL_requiref(m_state, "coroutine", &luaopen_coroutine, 1);
@@ -181,6 +181,35 @@ ScriptRunner::ScriptRunner(TurtleCanvasGraphicsItem* const graphicsWidget) :
     luaL_requiref(m_state, "utf8",      &luaopen_utf8,      1);
     lua_pop(m_state, 7);
 
+    // Load the os module, but remove functions that could modify the host system.
+    // This should provide protection against malicious scripts.
+    luaopen_os(m_state);
+
+    // os.execute = nil
+    lua_pushnil(m_state);
+    lua_setfield(m_state, 1, "execute");
+
+    // os.exit = nil
+    lua_pushnil(m_state);
+    lua_setfield(m_state, 1, "exit");
+
+    // os.remove = nil
+    lua_pushnil(m_state);
+    lua_setfield(m_state, 1, "remove");
+
+    // os.rename = nil
+    lua_pushnil(m_state);
+    lua_setfield(m_state, 1, "rename");
+
+    // os.setlocale = nil
+    lua_pushnil(m_state);
+    lua_setfield(m_state, 1, "setlocale");
+
+    // os.tmpname = nil
+    lua_pushnil(m_state);
+    lua_setfield(m_state, 1, "tmpname");
+
+    lua_setglobal(m_state, "os");
 
     setupCommands(m_state);
 }

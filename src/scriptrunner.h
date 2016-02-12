@@ -92,10 +92,10 @@ private:
 
     QWaitCondition m_pauseCond;
     mutable QMutex m_pauseMutex;
-    bool m_pause;
+    volatile bool m_pause;
 
     mutable QMutex m_haltMutex;
-    bool m_halt;
+    volatile bool m_halt;
 };
 
 #endif // COMMANDRUNNER_H
