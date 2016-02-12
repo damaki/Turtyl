@@ -202,7 +202,7 @@ end
 local turtle = Turtle.new()
 
 -------------------------------------------------------------------------------
--- Standard Logo turtle commands
+-- Standard turtle commands
 
 function fd(distance)
     assert(type(distance) == "number", "argument to fd() must be a number")
@@ -256,6 +256,14 @@ end
 
 function pd()
     turtle.pendown = true
+end
+
+function ht()
+    _ui.canvas.hideturtle()
+end
+
+function st()
+    _ui.canvas.showturtle()
 end
 
 function clear()
