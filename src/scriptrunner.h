@@ -67,6 +67,9 @@ protected:
     virtual void run();
 
 private:
+    void openRestrictedBaseModule();
+    void openRestrictedOsModule();
+
     void setupCommands(lua_State* state);
 
     void debugHook(lua_State* state);

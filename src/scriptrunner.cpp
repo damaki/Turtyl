@@ -172,44 +172,16 @@ ScriptRunner::ScriptRunner(TurtleCanvasGraphicsItem* const graphicsWidget) :
 
     // Load all libraries except io and debug.
     // These libraries are omitted for security.
-    luaL_requiref(m_state, "_G",        &luaopen_base,      1);
     luaL_requiref(m_state, "coroutine", &luaopen_coroutine, 1);
     luaL_requiref(m_state, "math",      &luaopen_math,      1);
     luaL_requiref(m_state, "package",   &luaopen_package,   1);
     luaL_requiref(m_state, "string",    &luaopen_string,    1);
     luaL_requiref(m_state, "table",     &luaopen_table,     1);
     luaL_requiref(m_state, "utf8",      &luaopen_utf8,      1);
-    lua_pop(m_state, 7);
+    lua_pop(m_state, 6);
 
-    // Load the os module, but remove functions that could modify the host system.
-    // This should provide protection against malicious scripts.
-    luaopen_os(m_state);
-
-    // os.execute = nil
-    lua_pushnil(m_state);
-    lua_setfield(m_state, 1, "execute");
-
-    // os.exit = nil
-    lua_pushnil(m_state);
-    lua_setfield(m_state, 1, "exit");
-
-    // os.remove = nil
-    lua_pushnil(m_state);
-    lua_setfield(m_state, 1, "remove");
-
-    // os.rename = nil
-    lua_pushnil(m_state);
-    lua_setfield(m_state, 1, "rename");
-
-    // os.setlocale = nil
-    lua_pushnil(m_state);
-    lua_setfield(m_state, 1, "setlocale");
-
-    // os.tmpname = nil
-    lua_pushnil(m_state);
-    lua_setfield(m_state, 1, "tmpname");
-
-    lua_setglobal(m_state, "os");
+    openRestrictedBaseModule();
+    openRestrictedOsModule();
 
     setupCommands(m_state);
 }
@@ -435,6 +407,90 @@ void ScriptRunner::run()
             }
         }
     }
+}
+
+/**
+ * @brief Load's lua's base module, but without unsafe functions.
+ *
+ * The following functions are @b removed from the base module:
+ *    - @c dofile
+ *    - @c load
+ *    - @c loadfile
+ */
+void ScriptRunner::openRestrictedBaseModule()
+{
+    // Ensure a clean stack
+    lua_pop(m_state, lua_gettop(m_state));
+
+    luaL_requiref(m_state, "_G", &luaopen_base, 1);
+
+    // _G.dofile = nil
+    lua_pushnil(m_state);
+    lua_setglobal(m_state, "dofile");
+
+    // _G.load = nil
+    lua_pushnil(m_state);
+    lua_setglobal(m_state, "load");
+
+    // _G.loadfile = nil
+    lua_pushnil(m_state);
+    lua_setglobal(m_state, "loadfile");
+
+    lua_pop(m_state, lua_gettop(m_state));
+}
+
+/**
+ * @brief Load's lua's os module, but without unsafe functions.
+ *
+ * The following functions are @b removed from the os module:
+ *    - @c os.execute
+ *    - @c os.exit
+ *    - @c os.getenv
+ *    - @c os.remove
+ *    - @c os.rename
+ *    - @c os.setlocale
+ *    - @c os.tmpname
+ */
+void ScriptRunner::openRestrictedOsModule()
+{
+    // Ensure a clean stack
+    lua_pop(m_state, lua_gettop(m_state));
+
+    // Load the os module, but remove functions that could modify the host system.
+    // This should provide protection against malicious scripts.
+    luaopen_os(m_state);
+
+    // os.execute = nil
+    lua_pushnil(m_state);
+    lua_setfield(m_state, 1, "execute");
+
+    // os.exit = nil
+    lua_pushnil(m_state);
+    lua_setfield(m_state, 1, "exit");
+
+    // os.getenv = nil
+    lua_pushnil(m_state);
+    lua_setfield(m_state, 1, "getenv");
+
+    // os.remove = nil
+    lua_pushnil(m_state);
+    lua_setfield(m_state, 1, "remove");
+
+    // os.rename = nil
+    lua_pushnil(m_state);
+    lua_setfield(m_state, 1, "rename");
+
+    // os.setlocale = nil
+    lua_pushnil(m_state);
+    lua_setfield(m_state, 1, "setlocale");
+
+    // os.tmpname = nil
+    lua_pushnil(m_state);
+    lua_setfield(m_state, 1, "tmpname");
+
+    lua_setglobal(m_state, "os");
+
+    lua_pop(m_state, lua_gettop(m_state));
 }
 
 /**
