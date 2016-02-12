@@ -303,7 +303,7 @@ function setscreencolor(r,g,b)
 end
 
 function screencolor()
-    return _ui.canvas.backgroundcolor()
+    return _ui.canvas.getbackgroundcolor()
 end
 
 function home()
