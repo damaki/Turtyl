@@ -278,6 +278,10 @@ function pd()
     turtles[currturtle].pendown = true
 end
 
+function pendown()
+    return turtles[currturtle].pendown
+end
+
 function ht()
     _ui.canvas.hideturtle()
 end
@@ -329,10 +333,6 @@ end
 function home()
     setpos(0,0)
     setorientation(0)
-end
-
-function circle(radius)
-    arc(360, radius)
 end
 
 function line(length)

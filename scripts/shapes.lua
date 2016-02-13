@@ -70,4 +70,21 @@ shapes.octagon   = namedshape(8)
 shapes.decagon   = namedshape(10)
 shapes.dodecagon = namedshape(12)
 
+function shapes.circle(radius, centered)
+    if pendown() then
+        if centered then
+            arc(360, radius)
+        else
+            local x,y = pos()
+
+            pu()
+            slideright(radius)
+            pd()
+            arc(360, radius)
+
+            setpos(x,y)
+        end
+    end
+end
+
 return shapes
