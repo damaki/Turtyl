@@ -199,29 +199,36 @@ function Turtle:setpencolor(r,g,b,a)
     self:updateui();
 end
 
-local turtle = Turtle.new()
+-- Table of all current turtles
+local turtles = {}
+
+-- Index or name of current turtle
+local currturtle  = 1
+
+-- Default turtle
+turtles[currturtle] = Turtle.new()
 
 -------------------------------------------------------------------------------
 -- Standard turtle commands
 
 function fd(distance)
     assert(type(distance) == "number", "argument to fd() must be a number")
-    turtle:forward(distance)
+    turtles[currturtle]:forward(distance)
 end
 
 function bk(distance)
 assert(type(distance) == "number", "argument to bk() must be a number")
-    turtle:backward(distance)
+    turtles[currturtle]:backward(distance)
 end
 
 function lt(degrees)
     assert(type(degrees) == "number", "argument to lt() must be a number")
-    turtle:left(degrees)
+    turtles[currturtle]:left(degrees)
 end
 
 function rt(degrees)
 assert(type(degrees) == "number", "argument to rt() must be a number")
-    turtle:right(degrees)
+    turtles[currturtle]:right(degrees)
 end
 
 function slideright(distance)
@@ -237,20 +244,21 @@ function slideleft(distance)
 end
 
 function setpos(x, y)
-    turtle:setpos(x,y)
+    turtles[currturtle]:setpos(x,y)
 end
 
 function pos()
-    return turtle.position.x, turtle.position.y
+    local t = turtles[currturtle]
+    return t.position.x, t.position.y
 end
 
 function setorientation(degrees)
     assert(type(degrees) == "number", "argument to setorientation() must be a number")
-    turtle:setorientation(degrees)
+    turtles[currturtle]:setorientation(degrees)
 end
 
 function orientation()
-    return math.deg(turtle.heading)
+    return math.deg(turtles[currturtle].heading)
 end
 
 function arc(degrees, xradius, yradius)
@@ -259,15 +267,15 @@ function arc(degrees, xradius, yradius)
     assert(yradius == nil or type(yradius) == "number",
            "3rd argument to arc() must be a number")
 
-    turtle:arc(degrees, xradius, yradius)
+    turtles[currturtle]:arc(degrees, xradius, yradius)
 end
 
 function pu()
-    turtle.pendown = false
+    turtles[currturtle].pendown = false
 end
 
 function pd()
-    turtle.pendown = true
+    turtles[currturtle].pendown = true
 end
 
 function ht()
@@ -284,7 +292,7 @@ end
 
 function setpensize(size)
     assert(type(size) == "number", "argument to setpensize() must be a number")
-    turtle.thickness = size
+    turtles[currturtle].thickness = size
 end
 
 function pensize()
@@ -292,7 +300,7 @@ function pensize()
 end
 
 function setpencolor(r,g,b,a)
-    turtle:setpencolor(r,g,b,a)
+    turtles[currturtle]:setpencolor(r,g,b,a)
 end
 
 function pencolor()
@@ -302,11 +310,11 @@ end
 function setpencap(cap)
     assert(type(cap) == "number", "argument to setpencap() must be an integer")
     assert(cap >= 1 and cap <= 3, "argument to setpencap() must be 1, 2, or 3")
-    turtle.pencap = cap
+    turtles[currturtle].pencap = cap
 end
 
 function pencap()
-   return turtle.pencap
+   return turtles[currturtle].pencap
 end
 
 function setscreencolor(r,g,b)
@@ -328,7 +336,7 @@ function circle(radius)
 end
 
 function line(length)
-    if turtle.pendown then
+    if turtles[currturtle].pendown then
         local x,y = pos() -- remember position
         pu()
         bk(length/2)
@@ -336,4 +344,17 @@ function line(length)
         fd(length)
         setpos(x,y) -- restore position
     end
+end
+
+function setturtle(name)
+    if name == nil then
+        return
+    end
+
+    if turtles[name] == nil then
+        turtles[name] = Turtle.new()
+    end
+    currturtle = name
+
+    turtles[name]:updateui()
 end
