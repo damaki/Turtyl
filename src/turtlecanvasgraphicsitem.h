@@ -141,6 +141,7 @@ private slots:
 private:
     void updateUsedArea(const QPoint& point);
     void updateUsedArea(const QPointF& point);
+    void updateUsedArea(const QRectF& rect);
 
     mutable QMutex m_mutex;
 

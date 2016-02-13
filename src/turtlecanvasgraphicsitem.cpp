@@ -260,8 +260,20 @@ void TurtleCanvasGraphicsItem::drawLine(QLineF line, const QPen &pen)
         // to QPixmap's origin (top-left of the pixmap).
         painter.drawLine(line);
 
-        updateUsedArea(line.p1());
-        updateUsedArea(line.p2());
+        const QPointF p1 = line.p1();
+        const QPointF p2 = line.p2();
+
+        const QRectF boundingBox(std::min(p1.x(), p2.x()),
+                                 std::min(p1.y(), p2.y()),
+                                 std::abs(p1.x() - p2.x()),
+                                 std::abs(p1.y() - p2.y()));
+
+        // Take the pen's width into account, otherwise the used rect
+        // won't cover the actual area drawn.
+        qreal margin = pen.widthF() / 2.0;
+        QMarginsF margins(margin, margin, margin, margin);
+
+        updateUsedArea(boundingBox.marginsAdded(margins));
     }
 
     emit canvasUpdated();
@@ -372,10 +384,12 @@ void TurtleCanvasGraphicsItem::drawArc(const QPointF &centerPos,
         QMatrix worldMatrix = painter.worldMatrix();
         boundingBox = worldMatrix.mapRect(boundingBox);
 
-        updateUsedArea(boundingBox.topLeft());
-        updateUsedArea(boundingBox.topRight());
-        updateUsedArea(boundingBox.bottomLeft());
-        updateUsedArea(boundingBox.bottomRight());
+        // Take the pen's width into account, otherwise the used rect
+        // won't cover the actual area drawn.
+        qreal margin = pen.widthF() / 2.0;
+        QMarginsF margins(margin, margin, margin, margin);
+
+        updateUsedArea(boundingBox.marginsAdded(margins));
     }
 
     emit canvasUpdated();
@@ -541,4 +555,12 @@ void TurtleCanvasGraphicsItem::updateUsedArea(const QPointF& point)
 {
     updateUsedArea(QPoint(static_cast<int>(std::round(point.x())),
                           static_cast<int>(std::round(point.y()))));
+}
+
+void TurtleCanvasGraphicsItem::updateUsedArea(const QRectF& rect)
+{
+    updateUsedArea(rect.topLeft());
+    updateUsedArea(rect.topRight());
+    updateUsedArea(rect.bottomLeft());
+    updateUsedArea(rect.bottomRight());
 }
