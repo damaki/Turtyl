@@ -98,13 +98,29 @@ The Qt license(s) can be viewed in the file QT_LICENSE.
 Turtyl is based on Qt 5. To build Turtyl you will need to download the Qt toolkit
 from https://www.qt.io/download/
 
-Once Qt is downloaded, use Qt Creator to open the ``turtyl.pro`` project file.
+Once Qt is installed, use Qt Creator to open the ``turtyl.pro`` project file.
 You will need to perform first time configuration of the build, but the defaults
 should be OK.
 
 Once the build configuration is set, just hit the build button in Qt Creator.
 
-After building you will need to copy two script files into the same directory
-as the ``turtyl`` executable before running Turtyl:
-  * scripts/print.lua
-  * scripts/turtle.lua
+After building you will need to copy the contents of the ``scripts`` directory
+to the build directory (containing the turtyl executable).
+
+It's also recommended to copy the file ``default_settings.ini`` to the build
+directory also - renaming to ``settings.ini`` - in the build directory. This
+ensures the default startup Lua scripts are run when the application launches.
+
+Copying these files can be set up automatically on each build in Qt setting
+a custom build step:
+1. Select "Projects" in the Qt Creator sidebar
+2. Select "Build & Run"
+3. Under "Build Steps" select "Custom Process Step" from the "Add Build Step"
+   drop-down menu.
+4. Enter the following configuration:
+    * **Command:** ``cp``
+    * **Arguments:** ``-r %{sourceDir}/scripts %{buildDir}/scripts``
+5. Create another custom process step:
+    * **Command:** ``cp``
+    * **Arguments:** ``%{sourceDir}/default_settings.ini %{buildDir}/settings.ini``
+     
