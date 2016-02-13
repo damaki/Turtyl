@@ -113,14 +113,14 @@ ensures the default startup Lua scripts are run when the application launches.
 
 Copying these files can be set up automatically on each build in Qt setting
 a custom build step:
-1. Select "Projects" in the Qt Creator sidebar
-2. Select "Build & Run"
-3. Under "Build Steps" select "Custom Process Step" from the "Add Build Step"
-   drop-down menu.
-4. Enter the following configuration:
+  1. Select "Projects" in the Qt Creator sidebar
+  2. Select "Build & Run"
+  3. Under "Build Steps" select "Custom Process Step" from the "Add Build Step"
+     drop-down menu.
+  4. Enter the following configuration:
     * **Command:** ``cp``
     * **Arguments:** ``-r %{sourceDir}/scripts %{buildDir}/scripts``
-5. Create another custom process step:
+  5. Create another custom process step:
     * **Command:** ``cp``
     * **Arguments:** ``%{sourceDir}/default_settings.ini %{buildDir}/settings.ini``
      
