@@ -308,7 +308,8 @@ function setpencolor(r,g,b,a)
 end
 
 function pencolor()
-    return turtle.pencolor.r, turtle.pencolor.g, turtle.pencolor.b, turtle.pencolor.a
+    local t = turtles[currturtle]
+    return t.pencolor.r, t.pencolor.g, t.pencolor.b, t.pencolor.a
 end
 
 function setpencap(cap)
