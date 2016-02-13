@@ -119,7 +119,7 @@ a custom build step:
      drop-down menu.
   4. Enter the following configuration:
     * **Command:** ``cp``
-    * **Arguments:** ``-r %{sourceDir}/scripts %{buildDir}/scripts``
+    * **Arguments:** ``-r %{sourceDir}/scripts %{buildDir}``
   5. Create another custom process step:
     * **Command:** ``cp``
     * **Arguments:** ``%{sourceDir}/default_settings.ini %{buildDir}/settings.ini``
