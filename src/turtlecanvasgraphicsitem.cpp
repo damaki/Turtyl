@@ -205,6 +205,11 @@ void TurtleCanvasGraphicsItem::clear()
     {
         QMutexLocker lock(&m_mutex);
         m_pixmap.fill(Qt::transparent);
+
+        m_usedRect = QRect(m_pixmap.width() / 2,
+                           m_pixmap.height() / 2,
+                           1,
+                           1);
     }
 
     emit canvasUpdated();
