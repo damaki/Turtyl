@@ -249,6 +249,36 @@ void ScriptRunner::haltScript()
     resumeScript();
 }
 
+/**
+ * @brief Sets lua's package.path to the specified string.
+ *
+ * @note See the lua documentation for package.path and package.searchers
+ * for acceptable string formats.
+ *
+ * @param path Paths to search. E.g. "/?/init.lua;./scripts/?.lua"
+ */
+void ScriptRunner::setRequirePath(const QString& path)
+{
+    QMutexLocker lock(&m_luaMutex);
+
+    lua_pop(m_state, lua_gettop(m_state));
+
+    if (!lua_getglobal(m_state, "package"))
+    {
+        return;
+    }
+
+    lua_pushstring(m_state, path.toStdString().c_str());
+    lua_setfield(m_state, 1, "path");
+
+    lua_pop(m_state, lua_gettop(m_state));
+}
+
+/**
+ * @brief Appends a path to be searched by lua when a module is loaded.
+ *
+ * @param path
+ */
 void ScriptRunner::addRequirePath(QString path)
 {
     path = path.trimmed().prepend(';');
@@ -314,17 +344,9 @@ void ScriptRunner::runScript(const QString& script)
 void ScriptRunner::runScriptFile(const QString& filename)
 {
     QMutexLocker lock(&m_luaMutex);
-    bool success = false;
 
-    if (LUA_OK == luaL_loadfile(m_state, filename.toStdString().c_str()))
-    {
-        if (LUA_OK == lua_pcall(m_state, 0, 0, 0))
-        {
-            success = true;
-        }
-    }
-
-    if (success)
+    lua_pop(m_state, lua_gettop(m_state));
+    if (0 == luaL_dofile(m_state, filename.toStdString().c_str()))
     {
         emit scriptFinished(false);
     }
@@ -430,18 +452,10 @@ void ScriptRunner::run()
         // Execute the lua script (if any)
         if (hasScriptData)
         {
-            bool success = false;
-
             QMutexLocker lock(&m_luaMutex);
-            if (LUA_OK == luaL_loadstring(m_state, scriptData.toStdString().c_str()))
-            {
-                if (LUA_OK == lua_pcall(m_state, 0, 0, 0))
-                {
-                    success = true;
-                }
-            }
+            lua_pop(m_state, lua_gettop(m_state));
 
-            if (success)
+            if (0 == luaL_dostring(m_state, scriptData.toStdString().c_str()))
             {
                 emit scriptFinished(false);
             }

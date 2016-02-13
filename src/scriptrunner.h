@@ -57,6 +57,7 @@ public:
     void resumeScript();
     void haltScript();
 
+    void setRequirePath(const QString& path);
     void addRequirePath(QString path);
 
     void runScript(const QString& script);
@@ -68,10 +69,18 @@ public:
 
 signals:
     void scriptFinished(bool hasErrors);
+
+    /**
+     * @brief This signal is emitted when a script encounters an error.
+     *
+     *
+     *
+     * @param message A string containing a displayable error message.
+     */
     void scriptError(const QString& message);
 
     /**
-     * @brief Emitted when the script has printed a message.
+     * @brief This signal is emitted when the script has printed a message.
      *
      * The message is stored internally in a queue of all pending messages.
      *
