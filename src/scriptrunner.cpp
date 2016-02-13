@@ -166,7 +166,7 @@ ScriptRunner::ScriptRunner(TurtleCanvasGraphicsItem* const graphicsWidget) :
     m_pause(false),
     m_haltMutex(),
     m_halt(false),
-    m_scriptMessageMutex(QMutex::Recursive),
+    m_scriptMessageMutex(),
     m_scriptMessageCond(),
     m_scriptMessage(),
     m_scriptMessagePending(false)
@@ -187,7 +187,7 @@ ScriptRunner::ScriptRunner(TurtleCanvasGraphicsItem* const graphicsWidget) :
     openRestrictedBaseModule();
     openRestrictedOsModule();
 
-    setupCommands(m_state);
+    setupCommands();
 }
 
 TurtleCanvasGraphicsItem* ScriptRunner::graphicsWidget() const
@@ -238,6 +238,13 @@ void ScriptRunner::haltScript()
     {
         QMutexLocker lock(&m_haltMutex);
         m_halt = true;
+    }
+
+    // Don't allow the Lua threads to sleep().
+    {
+        QMutexLocker lock(&m_sleepMutex);
+        m_sleepAllowed = false;
+        m_sleepCond.wakeAll();
     }
 
     // The script might be waiting to send a message.
@@ -316,6 +323,11 @@ void ScriptRunner::addRequirePath(QString path)
 void ScriptRunner::runScript(const QString& script)
 {
     {
+        QMutexLocker lock(&m_sleepMutex);
+        m_sleepAllowed = true;
+    }
+
+    {
         QMutexLocker lock(&m_pauseMutex);
         m_pause = false;
     }
@@ -343,6 +355,11 @@ void ScriptRunner::runScript(const QString& script)
  */
 void ScriptRunner::runScriptFile(const QString& filename)
 {
+    {
+        QMutexLocker lock(&m_sleepMutex);
+        m_sleepAllowed = true;
+    }
+
     QMutexLocker lock(&m_luaMutex);
 
     lua_pop(m_state, lua_gettop(m_state));
@@ -359,6 +376,18 @@ void ScriptRunner::runScriptFile(const QString& filename)
         }
 
         emit scriptFinished(true);
+    }
+}
+
+void ScriptRunner::doSleep(int msecs)
+{
+    if (msecs > 0)
+    {
+        QMutexLocker lock(&m_sleepMutex);
+        if (m_sleepAllowed)
+        {
+            (void)m_sleepCond.wait(&m_sleepMutex, msecs);
+        }
     }
 }
 
@@ -567,7 +596,7 @@ void ScriptRunner::openRestrictedOsModule()
  * @param[in,out] state The commands are registered to this lua state.
  * @param[in] scene The scene to associate with the lua state.
  */
-void ScriptRunner::setupCommands(lua_State* state)
+void ScriptRunner::setupCommands()
 {
     static const luaL_Reg uiTableFuncs[] =
     {
@@ -588,27 +617,31 @@ void ScriptRunner::setupCommands(lua_State* state)
         "turtlehidden",       &ScriptRunner::turtleHidden
     };
 
-    lua_settop(state, 0); // ensure empty stack
+    lua_settop(m_state, 0); // ensure empty stack
 
     // Add ourself to the script so that we can retrieve our
     // 'this' pointer when lua calls one of our functions.
-    lua_pushlightuserdata(state, this);
-    lua_setglobal(state, LUA_SCRIPT_RUNNER_NAME);
+    lua_pushlightuserdata(m_state, this);
+    lua_setglobal(m_state, LUA_SCRIPT_RUNNER_NAME);
 
-    luaL_newlib(state, uiTableFuncs);
+    luaL_newlib(m_state, uiTableFuncs);
 
-    lua_pushliteral(state, "canvas");
-    luaL_newlib(state, canvasTableFuncs);
+    lua_pushliteral(m_state, "canvas");
+    luaL_newlib(m_state, canvasTableFuncs);
 
-    lua_rawset(state, 1); // _ui['canvas'] = canvas
+    lua_rawset(m_state, 1); // _ui['canvas'] = canvas
 
-    lua_setglobal(state, "_ui"); // _G['_ui'] = _ui
+    lua_setglobal(m_state, "_ui"); // _G['_ui'] = _ui
 
-    lua_sethook(state, &debugHookEntry, LUA_MASKCOUNT, 1000);
+    lua_register(m_state, "sleep", &ScriptRunner::sleep);
+
+    lua_sethook(m_state, &debugHookEntry, LUA_MASKCOUNT, 1000);
 }
 
 void ScriptRunner::debugHook(lua_State* state)
 {
+    assert(state == m_state);
+
     // Block if the script is paused.
     {
         QMutexLocker lock(&m_pauseMutex);
@@ -617,7 +650,6 @@ void ScriptRunner::debugHook(lua_State* state)
             m_pauseCond.wait(&m_pauseMutex);
         }
     }
-
 
     if (haltRequested())
     {
@@ -889,6 +921,23 @@ int ScriptRunner::printMessage(lua_State* state)
     }
 
     getScriptRunner(state).emitMessage(message);
+
+    return 0;
+}
+
+int ScriptRunner::sleep(lua_State* state)
+{
+    qreal delay = getNumber(state, 1, "sleep()");
+
+    if (delay < 0.0)
+    {
+        delay = 0.0;
+    }
+
+    delay *= 1000;
+    unsigned long msecs = static_cast<unsigned long>(delay);
+
+    getScriptRunner(state).doSleep(msecs);
 
     return 0;
 }

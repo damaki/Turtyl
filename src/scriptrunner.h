@@ -92,13 +92,14 @@ protected:
     virtual void run();
 
 private:
+    void doSleep(int msecs);
     bool haltRequested() const;
     void emitMessage(const QString& message);
 
     void openRestrictedBaseModule();
     void openRestrictedOsModule();
 
-    void setupCommands(lua_State* state);
+    void setupCommands();
 
     void debugHook(lua_State* state);
 
@@ -113,6 +114,7 @@ private:
     static int hideTurtle(lua_State* state);
     static int turtleHidden(lua_State* state);
     static int printMessage(lua_State* state);
+    static int sleep(lua_State* state);
 
     static void debugHookEntry(lua_State* state, lua_Debug* );
 
@@ -137,6 +139,10 @@ private:
     QWaitCondition m_scriptMessageCond;
     QString m_scriptMessage;
     volatile bool m_scriptMessagePending;
+
+    QMutex m_sleepMutex;
+    QWaitCondition m_sleepCond;
+    volatile bool m_sleepAllowed;
 };
 
 #endif // COMMANDRUNNER_H
