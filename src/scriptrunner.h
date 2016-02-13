@@ -124,22 +124,34 @@ private:
 
     mutable QMutex m_luaMutex; // locked while a script is running
 
+    // Used to send Lua scripts to the thread to be run.
+    // See runScript() and run().
     QSemaphore m_scriptsQueueSema;
     mutable QMutex m_scriptsQueueMutex;
     QQueue<QString> m_scriptsQueue;
 
-    QWaitCondition m_pauseCond;
+    // Used to pause the script.
+    QWaitCondition m_pauseCond; // The Lua thread waits on this while m_pause==true
     mutable QMutex m_pauseMutex;
     volatile bool m_pause;
 
+    // Flag to tell the script to halt immediately.
     mutable QMutex m_haltMutex;
     volatile bool m_halt;
 
+    // Used to pass scripts' print() messages back to the UI.
+    // See emitMessage() and pendingScriptMessage()
     QMutex m_scriptMessageMutex;
     QWaitCondition m_scriptMessageCond;
     QString m_scriptMessage;
     volatile bool m_scriptMessagePending;
 
+    // These are used to implement an interruptable "sleep()" function in lua.
+    // The sleep needs to be interruptable so that we can always halt the script,
+    // even while it is sleeping (possibly with a huge timeout).
+    //
+    // The Lua thread uses m_sleepCond.wait() with a timeout to implement the
+    // sleep delay. The sleeping thread can be awoken early by calling m_sleepCond.notifyAll().
     QMutex m_sleepMutex;
     QWaitCondition m_sleepCond;
     volatile bool m_sleepAllowed;
