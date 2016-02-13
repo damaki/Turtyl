@@ -288,8 +288,6 @@ void ScriptRunner::setRequirePath(const QString& path)
  */
 void ScriptRunner::addRequirePath(QString path)
 {
-    path = path.trimmed().prepend(';');
-
     QMutexLocker lock(&m_luaMutex);
 
     // Ensure a clean stack
@@ -305,6 +303,14 @@ void ScriptRunner::addRequirePath(QString path)
         lua_pop(m_state, 1);
         return;
     }
+
+    // Handle ';' separator between paths
+    lua_len(m_state, 2);
+    if (lua_tointeger(m_state, -1) > 0)
+    {
+        path = path.trimmed().prepend(';');
+    }
+    lua_pop(m_state, 1);
 
     lua_pushstring(m_state, path.toStdString().c_str());
     lua_concat(m_state, 2);

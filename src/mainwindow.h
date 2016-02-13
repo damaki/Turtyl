@@ -25,6 +25,7 @@
 #include <QGraphicsView>
 #include <QPlainTextEdit>
 #include <QSpinBox>
+#include "settings.h"
 #include "scriptrunner.h"
 #include "aboutdialog.h"
 #include "preferencesdialog.h"
@@ -80,6 +81,8 @@ private:
     PreferencesDialog* m_prefsDialog;
     AboutDialog* m_aboutDialog;
     CanvasSaveOptionsDialog* m_canvasSaveOptionsDialog;
+
+    Settings m_settings;
 };
 
 #endif // MAINWINDOW_H

@@ -35,7 +35,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_cmds(m_turtleGraphics),
     m_prefsDialog(new PreferencesDialog(this)),
     m_aboutDialog(new AboutDialog(this)),
-    m_canvasSaveOptionsDialog(new CanvasSaveOptionsDialog(this))
+    m_canvasSaveOptionsDialog(new CanvasSaveOptionsDialog(this)),
+    m_settings("settings.ini")
 {
     ui->setupUi(this);
 
@@ -85,11 +86,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_cmds.start();
 
-    //TODO: Make startup scripts configurable.
-    m_cmds.addRequirePath("scripts/?.lua");
-    m_cmds.runScriptFile("print.lua");
-    m_cmds.runScriptFile("turtle.lua");
-    m_cmds.runScriptFile("stdlib.lua");
+    m_cmds.setRequirePath("");
+    for (const QString& path : m_settings.requirePaths())
+    {
+        m_cmds.addRequirePath(path);
+    }
+
+    for (const QString& filename : m_settings.startupScripts())
+    {
+        m_cmds.runScriptFile(filename);
+    }
 
     // Don't connect this until all the startup scripts have run
     // to prevent the error messages box from being cleared by successful scripts.
@@ -371,12 +377,33 @@ void MainWindow::loadScript()
 
 void MainWindow::restorePreferences()
 {
-    m_prefsDialog->setAntialias(m_turtleGraphics->antialiased());
-    m_prefsDialog->setCanvasSize(m_turtleGraphics->size());
+    Settings::Preferences prefs = m_settings.preferences();
+    m_prefsDialog->setCanvasSize(QSize(prefs.canvasWidth, prefs.canvasHeight));
+    m_prefsDialog->setAntialias(prefs.antialiased);
+    m_prefsDialog->setAutoShowScriptErrors(prefs.autoShowScriptErrors);
+    m_prefsDialog->setAutoShowScriptOutput(prefs.autoShowScriptOutput);
+
+    m_prefsDialog->setStartupScripts(m_settings.startupScripts());
+    m_prefsDialog->setRequirePaths(m_settings.requirePaths());
 }
 
 void MainWindow::applyPreferences()
 {
+    const QSize canvasSize = m_prefsDialog->canvasSize();
+
     m_turtleGraphics->setAntialiased(m_prefsDialog->antialias());
-    m_turtleGraphics->resize(m_prefsDialog->canvasSize());
+    m_turtleGraphics->resize(canvasSize);
+
+    Settings::Preferences prefs =
+    {
+        canvasSize.width(),
+        canvasSize.height(),
+        m_prefsDialog->antialias(),
+        m_prefsDialog->autoShowScriptErrors(),
+        m_prefsDialog->autoShowScriptOutput()
+    };
+    m_settings.setPreferences(prefs);
+
+    m_settings.setStartupScripts(m_prefsDialog->startupScripts());
+    m_settings.setRequirePaths(m_prefsDialog->requirePaths());
 }

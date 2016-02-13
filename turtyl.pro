@@ -23,14 +23,16 @@ SOURCES += src/main.cpp\
     src/turtlecanvasgraphicsitem.cpp \
     src/scriptrunner.cpp \
     src/aboutdialog.cpp \
-    src/canvassaveoptionsdialog.cpp
+    src/canvassaveoptionsdialog.cpp \
+    src/settings.cpp
 
 HEADERS  += src/mainwindow.h \
     src/preferencesdialog.h \
     src/turtlecanvasgraphicsitem.h \
     src/scriptrunner.h \
     src/aboutdialog.h \
-    src/canvassaveoptionsdialog.h
+    src/canvassaveoptionsdialog.h \
+    src/settings.h
 
 FORMS    += forms/mainwindow.ui \
     forms/preferencesdialog.ui \

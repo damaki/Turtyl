@@ -19,12 +19,25 @@
  ***********************************************************************/
 #include "preferencesdialog.h"
 #include "ui_preferencesdialog.h"
+#include <QFileDialog>
 
 PreferencesDialog::PreferencesDialog(QWidget* const parent) :
     QDialog(parent),
     ui(new Ui::PreferencesDialog)
 {
     ui->setupUi(this);
+
+    connect(ui->addStartupScriptButton, SIGNAL(clicked()),
+            this, SLOT(addStartupScript()));
+    connect(ui->addStartupScriptFileButton, SIGNAL(clicked()),
+            this, SLOT(addStartupScriptFile()));
+    connect(ui->removeStartupScriptButton, SIGNAL(clicked()),
+            this, SLOT(removeStartupScripts()));
+
+    connect(ui->addRequirePathButton, SIGNAL(clicked()),
+            this, SLOT(addRequirePath()));
+    connect(ui->removeRequirePathsButton, SIGNAL(clicked()),
+            this, SLOT(removeRequirePaths()));
 }
 
 PreferencesDialog::~PreferencesDialog()
@@ -72,4 +85,117 @@ bool PreferencesDialog::autoShowScriptOutput() const
 void PreferencesDialog::setAutoShowScriptOutput(bool on)
 {
     ui->autoShowOutputCheckBox->setChecked(on);
+}
+
+QList<QString> PreferencesDialog::startupScripts() const
+{
+    QList<QString> scripts;
+
+    const int size = ui->startupScriptListWidget->count();
+    for (int i = 0; i < size; i++)
+    {
+        QListWidgetItem* item = ui->startupScriptListWidget->item(i);
+        if (item != NULL)
+        {
+            scripts.append(item->text());
+        }
+    }
+
+    return scripts;
+}
+
+void PreferencesDialog::setStartupScripts(const QList<QString>& scripts)
+{
+    ui->startupScriptListWidget->clear();
+    for (const QString& str : scripts)
+    {
+        QListWidgetItem* item = new QListWidgetItem;
+        item->setText(str);
+        item->setFlags(item->flags() | Qt::ItemIsEditable);
+
+        ui->startupScriptListWidget->addItem(item);
+    }
+}
+
+QList<QString> PreferencesDialog::requirePaths() const
+{
+    QList<QString> paths;
+
+    const int size = ui->requirePathsListWidget->count();
+    for (int i = 0; i < size; i++)
+    {
+        QListWidgetItem* item = ui->requirePathsListWidget->item(i);
+        if (item != NULL)
+        {
+            paths.append(item->text());
+        }
+    }
+
+    return paths;
+}
+
+void PreferencesDialog::setRequirePaths(const QList<QString>& paths)
+{
+    ui->requirePathsListWidget->clear();
+    for (const QString& str : paths)
+    {
+        QListWidgetItem* item = new QListWidgetItem;
+        item->setText(str);
+        item->setFlags(item->flags() | Qt::ItemIsEditable);
+
+        ui->requirePathsListWidget->addItem(item);
+    }
+}
+
+void PreferencesDialog::addStartupScript()
+{
+    QListWidgetItem* item = new QListWidgetItem;
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
+    ui->startupScriptListWidget->addItem(item);
+    ui->startupScriptListWidget->editItem(item);
+}
+
+void PreferencesDialog::addStartupScriptFile()
+{
+    QFileDialog fileDialog(this);
+    fileDialog.setNameFilter("Lua (*.lua)");
+    fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+    fileDialog.setWindowTitle(tr("Select Startup Script"));
+
+    if (fileDialog.exec())
+    {
+        for (const QString& filename : fileDialog.selectedFiles())
+        {
+            QListWidgetItem* item = new QListWidgetItem;
+            item->setText(filename);
+            item->setFlags(item->flags() | Qt::ItemIsEditable);
+            ui->startupScriptListWidget->addItem(item);
+        }
+    }
+}
+
+void PreferencesDialog::removeStartupScripts()
+{
+    // Remove the selected items
+    for (QListWidgetItem* item : ui->startupScriptListWidget->selectedItems())
+    {
+        delete item;
+    }
+}
+
+void PreferencesDialog::addRequirePath()
+{
+    QListWidgetItem* item = new QListWidgetItem;
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
+    ui->requirePathsListWidget->addItem(item);
+    ui->requirePathsListWidget->editItem(item);
+}
+
+void PreferencesDialog::removeRequirePaths()
+{
+    // Remove the selected items
+    for (QListWidgetItem* item : ui->requirePathsListWidget->selectedItems())
+    {
+        delete item;
+    }
 }

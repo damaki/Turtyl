@@ -17,37 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***********************************************************************/
-#ifndef PREFERENCESDIALOG_H
-#define PREFERENCESDIALOG_H
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
-#include <QCheckBox>
-#include <QDialog>
-#include <QSpinBox>
+#include <QSettings>
 
-namespace Ui
+/**
+ * @brief Handles persistent application settings.
+ *
+ * This class is a wrapper around QSettings to manage various persistent
+ * settings, such as a list of scripts to be executed at startup.
+ */
+class Settings
 {
-class PreferencesDialog;
-}
-
-class PreferencesDialog : public QDialog
-{
-    Q_OBJECT
-
 public:
-    PreferencesDialog(QWidget* parent = 0);
-    ~PreferencesDialog();
+    struct Preferences
+    {
+        // Graphics
+        int canvasWidth;
+        int canvasHeight;
+        bool antialiased;
 
-    QSize canvasSize() const;
-    void setCanvasSize(QSize size);
+        // Messages
+        bool autoShowScriptErrors;
+        bool autoShowScriptOutput;
+    };
 
-    bool antialias() const;
-    void setAntialias(bool on);
+    Settings(const QString& filename);
 
-    bool autoShowScriptErrors() const;
-    void setAutoShowScriptErrors(bool on);
-
-    bool autoShowScriptOutput() const;
-    void setAutoShowScriptOutput(bool on);
+    Preferences preferences() const;
+    void setPreferences(const Preferences& prefs);
 
     QList<QString> startupScripts() const;
     void setStartupScripts(const QList<QString>& scripts);
@@ -55,16 +54,8 @@ public:
     QList<QString> requirePaths() const;
     void setRequirePaths(const QList<QString>& paths);
 
-private slots:
-    void addStartupScript();
-    void addStartupScriptFile();
-    void removeStartupScripts();
-
-    void addRequirePath();
-    void removeRequirePaths();
-
 private:
-    Ui::PreferencesDialog* ui;
+    mutable QSettings m_settings;
 };
 
-#endif // PREFERENCESDIALOG_H
+#endif // SETTINGS_H
