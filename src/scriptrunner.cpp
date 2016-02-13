@@ -635,7 +635,7 @@ void ScriptRunner::setupCommands()
 
     lua_register(m_state, "sleep", &ScriptRunner::sleep);
 
-    lua_sethook(m_state, &debugHookEntry, LUA_MASKCOUNT, 1000);
+    lua_sethook(m_state, &debugHookEntry, LUA_MASKCOUNT, 100);
 }
 
 void ScriptRunner::debugHook(lua_State* state)
