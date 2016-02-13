@@ -224,6 +224,18 @@ assert(type(degrees) == "number", "argument to rt() must be a number")
     turtle:right(degrees)
 end
 
+function slideright(distance)
+    rt(90)
+    fd(distance)
+    lt(90)
+end
+
+function slideleft(distance)
+    lt(90)
+    fd(distance)
+    rt(90)
+end
+
 function setpos(x, y)
     turtle:setpos(x,y)
 end
