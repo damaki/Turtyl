@@ -94,6 +94,8 @@ protected:
 private:
     void doSleep(int msecs);
     bool haltRequested() const;
+    void haltIfRequested();
+    void pauseIfRequested();
     void emitMessage(const QString& message);
 
     void openRestrictedBaseModule();

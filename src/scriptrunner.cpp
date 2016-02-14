@@ -409,6 +409,32 @@ bool ScriptRunner::haltRequested() const
     return m_halt;
 }
 
+/**
+ * @brief Halt the current script if it was requested.
+ *
+ * @warning This function will not return if it halts the script, since it calls
+ * lua_error().
+ */
+void ScriptRunner::haltIfRequested()
+{
+    if (haltRequested())
+    {
+        lua_error(m_state);
+    }
+}
+
+/**
+ * @brief This method blocks while the script is paused.
+ */
+void ScriptRunner::pauseIfRequested()
+{
+    QMutexLocker lock(&m_pauseMutex);
+    while (m_pause)
+    {
+        m_pauseCond.wait(&m_pauseMutex);
+    }
+}
+
 void ScriptRunner::emitMessage(const QString& message)
 {
     QMutexLocker lock(&m_scriptMessageMutex);
@@ -648,20 +674,9 @@ void ScriptRunner::debugHook(lua_State* state)
 {
     assert(state == m_state);
 
-    // Block if the script is paused.
-    {
-        QMutexLocker lock(&m_pauseMutex);
-        while (m_pause)
-        {
-            m_pauseCond.wait(&m_pauseMutex);
-        }
-    }
+    pauseIfRequested();
 
-    if (haltRequested())
-    {
-        // Stop the script
-        lua_error(state);
-    }
+    haltIfRequested();
 }
 
 /**
@@ -716,7 +731,10 @@ int ScriptRunner::drawLine(lua_State* state)
     QPen pen(clippedColor(r,g,b,a), size);
     setPenCapStyle(pen, capStyle);
 
-    getScriptRunner(state).graphicsWidget()->drawLine(line, pen);
+    ScriptRunner& runner = getScriptRunner(state);
+    runner.graphicsWidget()->drawLine(line, pen);
+    runner.pauseIfRequested();
+    runner.haltIfRequested();
 
     return 0;
 }
@@ -781,7 +799,10 @@ int ScriptRunner::drawArc(lua_State* state)
     QPen pen(clippedColor(r,g,b,a), size);
     setPenCapStyle(pen, capStyle);
 
-    getScriptRunner(state).graphicsWidget()->drawArc(arcCenterPos, startAngle, angle, xradius, yradius, pen);
+    ScriptRunner& runner = getScriptRunner(state);
+    runner.graphicsWidget()->drawArc(arcCenterPos, startAngle, angle, xradius, yradius, pen);
+    runner.pauseIfRequested();
+    runner.haltIfRequested();
 
     return 0;
 }
@@ -796,7 +817,10 @@ int ScriptRunner::drawArc(lua_State* state)
  */
 int ScriptRunner::clearScreen(lua_State* state)
 {
-    getScriptRunner(state).graphicsWidget()->clear();
+    ScriptRunner& runner = getScriptRunner(state);
+    runner.graphicsWidget()->clear();
+    runner.pauseIfRequested();
+    runner.haltIfRequested();
     return 0;
 }
 
@@ -819,7 +843,10 @@ int ScriptRunner::setBackgroundColor(lua_State* state)
     // Note: the background color is always opaque
     QColor color(clippedColor(r,g,b,255.0));
 
-    getScriptRunner(state).graphicsWidget()->setBackgroundColor(color);
+    ScriptRunner& runner = getScriptRunner(state);
+    runner.graphicsWidget()->setBackgroundColor(color);
+    runner.pauseIfRequested();
+    runner.haltIfRequested();
 
     return 0;
 }
@@ -829,7 +856,11 @@ int ScriptRunner::getBackgroundColor(lua_State* state)
     // Clear the stack
     lua_pop(state, lua_gettop(state));
 
-    const QColor color = getScriptRunner(state).graphicsWidget()->backgroundColor();
+    ScriptRunner& runner = getScriptRunner(state);
+    runner.pauseIfRequested();
+    runner.haltIfRequested();
+
+    const QColor color = runner.graphicsWidget()->backgroundColor();
 
     lua_pushinteger(state, color.red());
     lua_pushinteger(state, color.green());
@@ -863,7 +894,10 @@ int ScriptRunner::setTurtle(lua_State* state)
     QPointF pos(x,y);
     QColor color(clippedColor(r,g,b,a));
 
-    getScriptRunner(state).graphicsWidget()->setTurtle(pos, heading, color);
+    ScriptRunner& runner = getScriptRunner(state);
+    runner.graphicsWidget()->setTurtle(pos, heading, color);
+    runner.pauseIfRequested();
+    runner.haltIfRequested();
 
     return 0;
 }
@@ -877,7 +911,10 @@ int ScriptRunner::getTurtle(lua_State* state)
     qreal heading;
     QColor color;
 
-    getScriptRunner(state).graphicsWidget()->getTurtle(pos, heading, color);
+    ScriptRunner& runner = getScriptRunner(state);
+    runner.graphicsWidget()->getTurtle(pos, heading, color);
+    runner.pauseIfRequested();
+    runner.haltIfRequested();
 
     lua_pushnumber(state,  pos.x());
     lua_pushnumber(state,  pos.y());
@@ -892,20 +929,29 @@ int ScriptRunner::getTurtle(lua_State* state)
 
 int ScriptRunner::showTurtle(lua_State* state)
 {
-    getScriptRunner(state).graphicsWidget()->showTurtle();
+    ScriptRunner& runner = getScriptRunner(state);
+    runner.graphicsWidget()->showTurtle();
+    runner.pauseIfRequested();
+    runner.haltIfRequested();
     return 0;
 }
 
 int ScriptRunner::hideTurtle(lua_State* state)
 {
-    getScriptRunner(state).graphicsWidget()->hideTurtle();
-
+    ScriptRunner& runner = getScriptRunner(state);
+    runner.graphicsWidget()->hideTurtle();
+    runner.pauseIfRequested();
+    runner.haltIfRequested();
     return 0;
 }
 
 int ScriptRunner::turtleHidden(lua_State* state)
 {
-    const bool hidden = getScriptRunner(state).graphicsWidget()->turtleHidden();
+    ScriptRunner& runner = getScriptRunner(state);
+    runner.pauseIfRequested();
+    runner.haltIfRequested();
+
+    const bool hidden = runner.graphicsWidget()->turtleHidden();
 
     lua_pushboolean(state, hidden ? 1 : 0);
 
@@ -926,7 +972,10 @@ int ScriptRunner::printMessage(lua_State* state)
         }
     }
 
-    getScriptRunner(state).emitMessage(message);
+    ScriptRunner& runner = getScriptRunner(state);
+    runner.emitMessage(message);
+    runner.pauseIfRequested();
+    runner.haltIfRequested();
 
     return 0;
 }
@@ -943,7 +992,10 @@ int ScriptRunner::sleep(lua_State* state)
     delay *= 1000;
     unsigned long msecs = static_cast<unsigned long>(delay);
 
-    getScriptRunner(state).doSleep(msecs);
+    ScriptRunner& runner = getScriptRunner(state);
+    runner.doSleep(msecs);
+    runner.pauseIfRequested();
+    runner.haltIfRequested();
 
     return 0;
 }
