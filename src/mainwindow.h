@@ -68,7 +68,8 @@ private slots:
     void saveScript();
     void loadScript();
 
-    void restorePreferences();
+    void loadPreferences();
+    void savePreferences();
     void applyPreferences();
 
 private:

@@ -71,8 +71,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->action_Script_Output, SIGNAL(triggered(bool)),
             this, SLOT(showScriptOutputs()));
 
+    connect(m_prefsDialog, SIGNAL(rejected()), this, SLOT(loadPreferences()));
     connect(m_prefsDialog, SIGNAL(accepted()), this, SLOT(applyPreferences()));
-    connect(m_prefsDialog, SIGNAL(rejected()), this, SLOT(restorePreferences()));
+    connect(m_prefsDialog, SIGNAL(accepted()), this, SLOT(savePreferences()));
 
     connect(&m_cmds, SIGNAL(scriptError(QString)),
             this,    SLOT(showScriptError(QString)),
@@ -82,7 +83,8 @@ MainWindow::MainWindow(QWidget *parent) :
             this,    SLOT(showScriptOutput()),
             Qt::QueuedConnection);
 
-    restorePreferences();
+    loadPreferences();
+    applyPreferences();
 
     m_cmds.start();
 
@@ -375,7 +377,12 @@ void MainWindow::loadScript()
     }
 }
 
-void MainWindow::restorePreferences()
+/**
+ * @brief Loads the preferences from persistent storage and sets them in the preferences dialog.
+ *
+ * This can be used to undo changes in the preferences dialog.
+ */
+void MainWindow::loadPreferences()
 {
     Settings::Preferences prefs = m_settings.preferences();
     m_prefsDialog->setCanvasSize(QSize(prefs.canvasWidth, prefs.canvasHeight));
@@ -387,14 +394,12 @@ void MainWindow::restorePreferences()
     m_prefsDialog->setRequirePaths(m_settings.requirePaths());
 }
 
-void MainWindow::applyPreferences()
+/**
+ * @brief Takes the settings from the preferences dialog and saves them in persistent storage.
+ */
+void MainWindow::savePreferences()
 {
     const QSize canvasSize = m_prefsDialog->canvasSize();
-
-    m_turtleGraphics->setAntialiased(m_prefsDialog->antialias());
-    m_turtleGraphics->resize(canvasSize);
-
-    m_cmds.setRequirePaths(m_prefsDialog->requirePaths().join(';'));
 
     Settings::Preferences prefs =
     {
@@ -408,4 +413,15 @@ void MainWindow::applyPreferences()
 
     m_settings.setStartupScripts(m_prefsDialog->startupScripts());
     m_settings.setRequirePaths(m_prefsDialog->requirePaths());
+}
+
+/**
+ * @brief Takes the settings from the preferences dialog and applies them to the program.
+ */
+void MainWindow::applyPreferences()
+{
+    m_turtleGraphics->setAntialiased(m_prefsDialog->antialias());
+    m_turtleGraphics->resize(m_prefsDialog->canvasSize());
+
+    m_cmds.setRequirePaths(m_prefsDialog->requirePaths().join(';'));
 }
