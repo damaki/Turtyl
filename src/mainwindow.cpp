@@ -86,7 +86,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_cmds.start();
 
-    m_cmds.setRequirePath("");
+    m_cmds.setRequirePaths("");
     for (const QString& path : m_settings.requirePaths())
     {
         m_cmds.addRequirePath(path);
@@ -393,6 +393,8 @@ void MainWindow::applyPreferences()
 
     m_turtleGraphics->setAntialiased(m_prefsDialog->antialias());
     m_turtleGraphics->resize(canvasSize);
+
+    m_cmds.setRequirePaths(m_prefsDialog->requirePaths().join(';'));
 
     Settings::Preferences prefs =
     {

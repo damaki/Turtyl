@@ -169,7 +169,10 @@ ScriptRunner::ScriptRunner(TurtleCanvasGraphicsItem* const graphicsWidget) :
     m_scriptMessageMutex(),
     m_scriptMessageCond(),
     m_scriptMessage(),
-    m_scriptMessagePending(false)
+    m_scriptMessagePending(false),
+    m_requirePathsMutex(),
+    m_requirePaths(),
+    m_requirePathsChanged(false)
 {
     assert(NULL != m_state);
     assert(NULL != graphicsWidget);
@@ -188,6 +191,8 @@ ScriptRunner::ScriptRunner(TurtleCanvasGraphicsItem* const graphicsWidget) :
     openRestrictedOsModule();
 
     setupCommands();
+
+    applyRequirePaths();
 }
 
 TurtleCanvasGraphicsItem* ScriptRunner::graphicsWidget() const
@@ -262,61 +267,41 @@ void ScriptRunner::haltScript()
  * @note See the lua documentation for package.path and package.searchers
  * for acceptable string formats.
  *
+ * @note The new require paths are applied the next time a script is
+ * run. It does not affect the currently running script.
+ *
  * @param path Paths to search. E.g. "/?/init.lua;./scripts/?.lua"
  */
-void ScriptRunner::setRequirePath(const QString& path)
+void ScriptRunner::setRequirePaths(const QString& paths)
 {
-    QMutexLocker lock(&m_luaMutex);
-
-    lua_pop(m_state, lua_gettop(m_state));
-
-    if (!lua_getglobal(m_state, "package"))
-    {
-        return;
-    }
-
-    lua_pushstring(m_state, path.toStdString().c_str());
-    lua_setfield(m_state, 1, "path");
-
-    lua_pop(m_state, lua_gettop(m_state));
+    QMutexLocker lock(&m_requirePathsMutex);
+    m_requirePaths = paths;
+    m_requirePathsChanged = true;
 }
 
 /**
  * @brief Appends a path to be searched by lua when a module is loaded.
  *
- * @param path
+ * @note See the lua documentation for package.path and package.searchers
+ * for acceptable string formats.
+ *
+ * @note The new require paths are applied the next time a script is
+ * run. It does not affect the currently running script.
+ *
+ * @param path The path to append.
  */
-void ScriptRunner::addRequirePath(QString path)
+void ScriptRunner::addRequirePath(const QString& path)
 {
-    QMutexLocker lock(&m_luaMutex);
-
-    // Ensure a clean stack
-    lua_pop(m_state, lua_gettop(m_state));
-
-    if (!lua_getglobal(m_state, "package"))
+    QMutexLocker lock(&m_requirePathsMutex);
+    if (m_requirePaths.isEmpty())
     {
-        return;
+        m_requirePaths = path;
     }
-
-    if (!lua_getfield(m_state, 1, "path"))
+    else
     {
-        lua_pop(m_state, 1);
-        return;
+        m_requirePaths += ';' + path;
     }
-
-    // Handle ';' separator between paths
-    lua_len(m_state, 2);
-    if (lua_tointeger(m_state, -1) > 0)
-    {
-        path = path.trimmed().prepend(';');
-    }
-    lua_pop(m_state, 1);
-
-    lua_pushstring(m_state, path.toStdString().c_str());
-    lua_concat(m_state, 2);
-    lua_setfield(m_state, 1, "path");
-
-    lua_pop(m_state, lua_gettop(m_state));
+    m_requirePathsChanged = true;
 }
 
 /**
@@ -368,6 +353,8 @@ void ScriptRunner::runScriptFile(const QString& filename)
 
     QMutexLocker lock(&m_luaMutex);
 
+    applyRequirePaths();
+
     lua_pop(m_state, lua_gettop(m_state));
     if (0 == luaL_dofile(m_state, filename.toStdString().c_str()))
     {
@@ -382,6 +369,38 @@ void ScriptRunner::runScriptFile(const QString& filename)
         }
 
         emit scriptFinished(true);
+    }
+}
+
+/**
+ * @brief Update Lua's @c package.path with the updated require paths.
+ *
+ * If the require paths have not been changed since the last time
+ * applyRequirePaths() was called then this method has no effect.
+ *
+ * @see setRequirePaths()
+ * @see addRequirePath()
+ *
+ * @pre @c m_luaMutex is locked by the caller.
+ */
+void ScriptRunner::applyRequirePaths()
+{
+    QMutexLocker lock(&m_requirePathsMutex);
+    if (m_requirePathsChanged)
+    {
+        m_requirePathsChanged = false;
+
+        lua_pop(m_state, lua_gettop(m_state));
+
+        if (!lua_getglobal(m_state, "package"))
+        {
+            return;
+        }
+
+        lua_pushstring(m_state, m_requirePaths.toStdString().c_str());
+        lua_setfield(m_state, 1, "path");
+
+        lua_pop(m_state, lua_gettop(m_state));
     }
 }
 
@@ -514,6 +533,9 @@ void ScriptRunner::run()
         if (hasScriptData)
         {
             QMutexLocker lock(&m_luaMutex);
+
+            applyRequirePaths();
+
             lua_pop(m_state, lua_gettop(m_state));
 
             if (0 == luaL_dostring(m_state, scriptData.toStdString().c_str()))

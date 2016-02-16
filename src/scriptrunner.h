@@ -57,8 +57,8 @@ public:
     void resumeScript();
     void haltScript();
 
-    void setRequirePath(const QString& path);
-    void addRequirePath(QString path);
+    void setRequirePaths(const QString& paths);
+    void addRequirePath(const QString& path);
 
     void runScript(const QString& script);
 
@@ -92,6 +92,7 @@ protected:
     virtual void run();
 
 private:
+    void applyRequirePaths();
     void doSleep(int msecs);
     bool haltRequested() const;
     void haltIfRequested();
@@ -157,6 +158,11 @@ private:
     QMutex m_sleepMutex;
     QWaitCondition m_sleepCond;
     volatile bool m_sleepAllowed;
+
+    // Require paths management.
+    QMutex m_requirePathsMutex;
+    QString m_requirePaths;
+    volatile bool m_requirePathsChanged;
 };
 
 #endif // COMMANDRUNNER_H
