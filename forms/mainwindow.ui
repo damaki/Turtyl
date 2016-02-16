@@ -26,6 +26,15 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="backgroundBrush">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>64</red>
+         <green>64</green>
+         <blue>64</blue>
+        </color>
+       </brush>
+      </property>
       <property name="dragMode">
        <enum>QGraphicsView::ScrollHandDrag</enum>
       </property>
