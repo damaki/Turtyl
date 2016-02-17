@@ -54,6 +54,12 @@ TurtleCanvasGraphicsItem::TurtleCanvasGraphicsItem() :
 /**
  * @brief Return an image of the canvas.
  *
+ * @param transparentBackground When set to @c true the backround in
+ *      the returned image will be transparent. Otherwise, the background
+ *      is filled with the current canvas background color.
+ * @param fitToUsedArea When set to @c true the returned image will be
+ *      fit to the bounding rect of the area of the canvas that has been
+ *      drawn to. Otherwise, the entire canvas is returned.
  * @return The canvas image.
  */
 QImage TurtleCanvasGraphicsItem::toImage(bool transparentBackground,
@@ -91,6 +97,14 @@ bool TurtleCanvasGraphicsItem::antialiased() const
     return m_antialiased;
 }
 
+/**
+ * @brief Enable or disable antialiasing.
+ *
+ * Changing this option takes effect immediately, but has no effect on
+ * the current drawings on the canvas.
+ *
+ * @param on
+ */
 void TurtleCanvasGraphicsItem::setAntialiased(const bool on)
 {
     QMutexLocker lock(&m_mutex);

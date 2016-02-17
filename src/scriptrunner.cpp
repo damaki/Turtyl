@@ -154,7 +154,11 @@ static void setPenCapStyle(QPen& pen, lua_Integer capStyle)
     }
 }
 
-
+/**
+ * @brief Constructor
+ *
+ * @param graphicsWidget Pointer to the canvas to where scripts will draw.
+ */
 ScriptRunner::ScriptRunner(TurtleCanvasGraphicsItem* const graphicsWidget) :
     m_state(luaL_newstate()),
     m_graphicsWidget(graphicsWidget),
@@ -195,6 +199,17 @@ ScriptRunner::ScriptRunner(TurtleCanvasGraphicsItem* const graphicsWidget) :
     applyRequirePaths();
 }
 
+ScriptRunner::~ScriptRunner()
+{
+    requestThreadStop();
+    wait();
+}
+
+/**
+ * @brief Get the canvas associated with the ScriptRunner.
+ *
+ * @return The canvas.
+ */
 TurtleCanvasGraphicsItem* ScriptRunner::graphicsWidget() const
 {
     return m_graphicsWidget;
@@ -404,6 +419,18 @@ void ScriptRunner::applyRequirePaths()
     }
 }
 
+/**
+ * @brief Blocks for the specified delay.
+ *
+ * @note This method will only block for the specified delay if the script
+ * is not being halted. Furthermore, the sleep will end prematurely if
+ * haltScript() is called while the thread is sleeping.
+ *
+ * @see runScript()
+ * @see haltScript()
+ *
+ * @param msecs The number of milliseconds to delay.
+ */
 void ScriptRunner::doSleep(int msecs)
 {
     if (msecs > 0)
@@ -454,6 +481,19 @@ void ScriptRunner::pauseIfRequested()
     }
 }
 
+/**
+ * @brief Send a message.
+ *
+ * This message causes the scriptMessageReceived() signal to be emitted.
+ *
+ * Normally this method will complete quickly without blocking. However,
+ * if the previous message has not yet been read then this method will
+ * block until the previous message has been read (see pendingScriptMessage()).
+ * The purpose of this is to throttle the rate at which messages are sent
+ * to avoid overloading the UI thread.
+ *
+ * @param message The message to send.
+ */
 void ScriptRunner::emitMessage(const QString& message)
 {
     QMutexLocker lock(&m_scriptMessageMutex);
@@ -478,7 +518,7 @@ void ScriptRunner::emitMessage(const QString& message)
 /**
  * @brief Get all pending messages printed by the script.
  *
- * @return A queue containing each individual message printed by the script.
+ * @return The pending message.
  */
 QString ScriptRunner::pendingScriptMessage()
 {
@@ -492,6 +532,9 @@ QString ScriptRunner::pendingScriptMessage()
     return message;
 }
 
+/**
+ * @brief Ignore the currently pending message from the script.
+ */
 void ScriptRunner::clearPendingScriptMessage()
 {
     QMutexLocker lock(&m_scriptMessageMutex);
@@ -500,6 +543,13 @@ void ScriptRunner::clearPendingScriptMessage()
     m_scriptMessageCond.wakeAll();
 }
 
+/**
+ * @brief ScriptRunner thread entry point.
+ *
+ * This thread waits for scripts runScript() to be called to run
+ * a Lua script. The script is passed to this thread via @c m_scriptsQueue
+ * where it is then executed in the Lua VM.
+ */
 void ScriptRunner::run()
 {
     QString scriptData;
@@ -534,6 +584,7 @@ void ScriptRunner::run()
         {
             QMutexLocker lock(&m_luaMutex);
 
+            // There may be new require paths (for package.path) to use.
             applyRequirePaths();
 
             lua_pop(m_state, lua_gettop(m_state));
@@ -692,6 +743,14 @@ void ScriptRunner::setupCommands()
     lua_sethook(m_state, &debugHookEntry, LUA_MASKCOUNT, 100);
 }
 
+/**
+ * @brief Debug hook.
+ *
+ * This debug hook is called periodically by the Lua VM (via debugHookEntry())
+ * and handles pausing and halting scripts.
+ *
+ * @param state The Lua VM.
+ */
 void ScriptRunner::debugHook(lua_State* state)
 {
     assert(state == m_state);

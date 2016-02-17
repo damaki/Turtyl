@@ -33,6 +33,42 @@
  * Errors produced when either loading/compiling or running a script
  * produce an error message via the @c scriptError(QString) signal.
  *
+ * @section Running scripts
+ *
+ * Arbitrary Lua scripts can be run by calling runScript() and passing
+ * the Lua source code as the string argument. The script is executed
+ * by the ScriptRunner thread to avoid blocking the caller. Therefore,
+ * runScript() will return immediately, before the script has finished
+ * running.
+ *
+ * When the script has finished executing the scriptFinished() signal
+ * is emitted. The boolean parameter for scriptFinished() denotes
+ * the termination condition for the script i.e. whether or not an
+ * error occurred.
+ *
+ * @subsection Controlling Script Execution
+ *
+ * While a script is running it is possible to pause and resume execution, or
+ * prematurely halt/stop/terminate the script execution.
+ *
+ * The pauseScript() method will pause a currently running script, i.e. the
+ * script will be blocked until resumeScript() is called. No Lua instructions
+ * are executed whilst the script is paused.
+ *
+ * @note When calling pauseScript() there may be a small delay (several
+ * Lua instructions) until the script is actually paused.
+ *
+ * A running script can be stopped prematurely by calling haltScript().
+ * Calling haltScript() will cause the script to terminate as soon as
+ * possible, regardless of what the script is currently doing.
+ *
+ * @section Drawing
+ *
+ * The ScriptRunner registers several Lua functions that are accessible
+ * by scripts. These functions are used to modify the canvas, such as
+ * drawing lines. The target canvas is passed in the constructor of the
+ * ScriptRunner.
+ *
  * @section Script Messages
  *
  * Scripts can call the @c _ui.print() message to print strings. When
@@ -41,6 +77,10 @@
  *
  * After the @c scriptMessageReceived() signal has been emitted
  * pendingScriptMessage() must be called to read the message.
+ *
+ * @warning There @b must be a slot handler for scriptMessageReceived()
+ * which calls @c pendingScriptMessage() or clearPendingScriptMessage().
+ * Otherwise, the script may be blocked until it is explicitly halted.
  */
 class ScriptRunner : public QThread
 {
@@ -48,6 +88,7 @@ class ScriptRunner : public QThread
 
 public:
     ScriptRunner(TurtleCanvasGraphicsItem* graphicsWidget);
+    virtual ~ScriptRunner();
 
     TurtleCanvasGraphicsItem* graphicsWidget() const;
 
