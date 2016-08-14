@@ -705,7 +705,8 @@ void ScriptRunner::setupCommands()
 {
     static const luaL_Reg uiTableFuncs[] =
     {
-        "print", &ScriptRunner::printMessage
+        "print", &ScriptRunner::printMessage,
+        NULL,    NULL
     };
 
     static const luaL_Reg canvasTableFuncs[] =
@@ -719,7 +720,8 @@ void ScriptRunner::setupCommands()
         "getturtle",          &ScriptRunner::getTurtle,
         "showturtle",         &ScriptRunner::showTurtle,
         "hideturtle",         &ScriptRunner::hideTurtle,
-        "turtlehidden",       &ScriptRunner::turtleHidden
+        "turtlehidden",       &ScriptRunner::turtleHidden,
+        NULL,                 NULL
     };
 
     lua_settop(m_state, 0); // ensure empty stack
