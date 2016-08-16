@@ -159,6 +159,7 @@ private:
     static int turtleHidden(lua_State* state);
     static int printMessage(lua_State* state);
     static int sleep(lua_State* state);
+    static int setAntialiasing(lua_State* state);
 
     static void debugHookEntry(lua_State* state, lua_Debug* );
 

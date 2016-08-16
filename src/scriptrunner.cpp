@@ -110,6 +110,25 @@ static lua_Integer getInteger(lua_State* state, int stackPos, const char* funcNa
     return integer;
 }
 
+static bool getBoolean(lua_State* state, int stackPos, const char* funcName)
+{
+    if (0 == lua_isboolean(state, stackPos))
+    {
+        lua_pushstring(state,
+                       QString("argument %1 to %2 must be a boolean value")
+                       .arg(stackPos)
+                       .arg(funcName)
+                       .toStdString().c_str());
+        lua_error(state);
+
+        return false;
+    }
+    else
+    {
+        return 0 != lua_toboolean(state, stackPos);
+    }
+}
+
 /**
  * @brief Return a QColor from real RGBA components.
  *
@@ -721,6 +740,7 @@ void ScriptRunner::setupCommands()
         "showturtle",         &ScriptRunner::showTurtle,
         "hideturtle",         &ScriptRunner::hideTurtle,
         "turtlehidden",       &ScriptRunner::turtleHidden,
+        "setaa",              &ScriptRunner::setAntialiasing,
         NULL,                 NULL
     };
 
@@ -1082,6 +1102,20 @@ int ScriptRunner::sleep(lua_State* state)
 
     return 0;
 }
+
+int ScriptRunner::setAntialiasing(lua_State* state)
+{
+    bool value = getBoolean(state, 1, "setaa");
+
+    ScriptRunner& runner = getScriptRunner(state);
+    if (NULL != runner.m_graphicsWidget)
+    {
+        runner.m_graphicsWidget->setAntialiased(value);
+    }
+
+    return 0;
+}
+
 
 /**
  * @brief Lua debug hook.

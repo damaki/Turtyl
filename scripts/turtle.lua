@@ -359,3 +359,11 @@ function setturtle(name)
 
     turtles[name]:updateui()
 end
+
+function aaon()
+    _ui.canvas.setaa(true)
+end
+
+function aaoff()
+    _ui.canvas.setaa(false)
+end
