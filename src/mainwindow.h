@@ -59,6 +59,7 @@ private slots:
     void haltScript();
 
     void resizeGraphicsScene();
+    void centerGraphicsScene();
 
     void showErrors();
     void showScriptOutputs();

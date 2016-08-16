@@ -44,6 +44,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setScene(m_scene);
     ui->graphicsView->centerOn(0.0, 0.0);
 
+    // Add the graphics view actions
+    QAction* centerAction = new QAction("&Center View", NULL);
+    connect(centerAction, SIGNAL(triggered()), this, SLOT(centerGraphicsScene()));
+    ui->graphicsView->addAction(centerAction);
+
+    ui->graphicsView->setContextMenuPolicy(Qt::ActionsContextMenu);
+
     ui->errorMessagesTextEdit->setTextColor(Qt::red);
 
     // These buttons are only enabled while a script is running.
@@ -230,6 +237,14 @@ void MainWindow::haltScript()
 void MainWindow::resizeGraphicsScene()
 {
     m_scene->setSceneRect(m_turtleGraphics->boundingRect().translated(m_turtleGraphics->pos()));
+}
+
+/**
+ * @brief Centers the QGraphicsView view to its origin.
+ */
+void MainWindow::centerGraphicsScene()
+{
+    ui->graphicsView->centerOn(0.0, 0.0);
 }
 
 /**
