@@ -117,6 +117,7 @@ function Turtle.new()
     t.thickness     = 1
     t.pendown       = true
     t.pencap        = roundcap
+    t.hidden        = false
 
     return t
 end
@@ -231,6 +232,26 @@ function Turtle:setpencolor(r,g,b,a)
     self:updateui();
 end
 
+function Turtle:hide()
+    self.hidden = true
+    _ui.canvas.hideturtle()
+end
+
+function Turtle:show()
+    self.hidden = false
+    _ui.canvas.showturtle()
+end
+
+function Turtle:switchto()
+    self:updateui()
+
+    if self.hidden then
+        _ui.canvas.hideturtle()
+    else
+        _ui.canvas.showturtle()
+    end
+end
+
 -- Table of all current turtles
 local turtles = {}
 
@@ -239,6 +260,7 @@ local currturtle  = 1
 
 -- Default turtle
 turtles[currturtle] = Turtle.new()
+turtles[currturtle]:switchto()
 
 -------------------------------------------------------------------------------
 -- Standard turtle commands
@@ -324,11 +346,11 @@ function pendown()
 end
 
 function ht()
-    _ui.canvas.hideturtle()
+    turtles[currturtle]:hide()
 end
 
 function st()
-    _ui.canvas.showturtle()
+    turtles[currturtle]:show()
 end
 
 function clear()
@@ -398,7 +420,7 @@ function setturtle(name)
     end
     currturtle = name
 
-    turtles[name]:updateui()
+    turtles[name]:switchto()
 end
 
 function aaon()
