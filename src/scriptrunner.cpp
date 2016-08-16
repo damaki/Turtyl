@@ -30,16 +30,16 @@ static const char* LUA_SCRIPT_RUNNER_NAME = "_turtyl_script_runner";
 
 
 /**
- * @brief Get the @c CommandRunner associated with a Lua VM.
+ * @brief Get the @c ScriptRunner associated with a Lua VM.
  *
- * If the script does not have a CommandRunner associated with it then
+ * If the script does not have a ScriptRunner associated with it then
  * @c lua_error is called and this function does not return.
  *
  * @warning This function must only be called from C functions called from Lua.
  * This is because this function calls @c lua_error if an error occurs.
  *
  * @param state The lua state.
- * @return The @c CommandRunner read from the lua state.
+ * @return The @c ScriptRunner read from the lua state.
  */
 static ScriptRunner& getScriptRunner(lua_State* state)
 {

@@ -25,7 +25,6 @@
 #include <QStyleOptionGraphicsItem>
 #include <cassert>
 #include <cmath>
-#include <iostream>
 
 static const int DEFAULT_SIZE = 2048;
 
@@ -258,7 +257,7 @@ void TurtleCanvasGraphicsItem::drawLine(QLineF line, const QPen &pen)
             // rounding, which causes rendering artifacts where some lines are offset by 1 pixel.
             //
             // For example, if a coordinate value is 4.99999 then QPainter clips this to 4, which
-            // causes an error.
+            // causes an artifact.
             //
             // An example of a lua script which generates these artifacts is:
             //    for n=1,1000,1 do fd(n) rt(90) end
