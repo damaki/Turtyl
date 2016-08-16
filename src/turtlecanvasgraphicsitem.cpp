@@ -25,6 +25,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <cassert>
 #include <cmath>
+#include <iostream>
 
 static const int DEFAULT_SIZE = 2048;
 
@@ -453,6 +454,24 @@ void TurtleCanvasGraphicsItem::resize(QSize newSize)
                                m_pixmap.rect());
 
             m_pixmap = newpixmap;
+
+            const QRect pixmapRect = m_pixmap.rect();
+            if (m_usedRect.left() < pixmapRect.left())
+            {
+                m_usedRect.setLeft(pixmapRect.left());
+            }
+            if (m_usedRect.right() > pixmapRect.right())
+            {
+                m_usedRect.setRight(pixmapRect.right());
+            }
+            if (m_usedRect.top() < pixmapRect.top())
+            {
+                m_usedRect.setTop(pixmapRect.top());
+            }
+            if (m_usedRect.bottom() > pixmapRect.bottom())
+            {
+                m_usedRect.setBottom(pixmapRect.bottom());
+            }
 
             update();
 
