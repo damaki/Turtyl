@@ -180,6 +180,38 @@ function Turtle:arc(angle, xradius, yradius)
     end
 end
 
+function Turtle:arc2(angle, xradius, yradius)
+    if yradius == nul then
+        yradius = xradius
+    end
+
+    if self.pendown then
+        _ui.canvas.drawarc(self.position.x, self.position.y,
+                           math.deg(self.heading),
+                           angle,
+                           xradius,
+                           yradius,
+                           self.pencolor.r, self.pencolor.g, self.pencolor.b, self.pencolor.a,
+                           self.thickness,
+                           self.pencap)
+    end
+
+    -- Move the turtle position to the end of the arc
+    local oldpos = {x=self.position.x, y=self.position.y}
+    local pos = {x = yradius*math.sin(math.rad(angle)),
+                 y = xradius*math.cos(math.rad(angle))}
+
+    self.position.x = pos.x * math.cos(-self.heading) - pos.y * math.sin(-self.heading)
+    self.position.y = pos.y * math.cos(-self.heading) + pos.x * math.sin(-self.heading)
+
+    self.position.x = self.position.x + oldpos.x
+    self.position.y = self.position.y + oldpos.y
+
+    self.heading  = self.heading + math.rad(angle) + (math.pi / 2)
+
+    self:updateui()
+end
+
 function Turtle:setpos(x,y)
     local pos = {x=x, y=y}
     self.position = pos
@@ -268,6 +300,15 @@ function arc(degrees, xradius, yradius)
            "3rd argument to arc() must be a number")
 
     turtles[currturtle]:arc(degrees, xradius, yradius)
+end
+
+function arc2(degrees, xradius, yradius)
+    assert(type(degrees) == "number", "1st argument to arc2() must be a number")
+    assert(type(xradius) == "number", "2nd argument to arc2() must be a number")
+    assert(yradius == nil or type(yradius) == "number",
+           "3rd argument to arc2() must be a number")
+
+    turtles[currturtle]:arc2(degrees, xradius, yradius)
 end
 
 function pu()
