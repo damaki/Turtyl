@@ -363,6 +363,11 @@ void TurtleCanvasGraphicsItem::drawArc(const QPointF &centerPos,
         QPainter painter(&m_pixmap);
         painter.setRenderHint(QPainter::Antialiasing, m_antialiased);
 
+        // SmoothPixMapTransform is also used when AA is turned on to reduce
+        // aliasing artifacts for filled arcs with a non-solid pattern such as
+        // Dense3Pattern, which appear when rotation is used.
+        painter.setRenderHint(QPainter::SmoothPixmapTransform, m_antialiased);
+
         // Bounding box centered around the origin.
         // This permits rotating the drawing around the origing, based on startAngle.
         QRectF boundingBox(-xradius,
