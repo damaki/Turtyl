@@ -122,7 +122,9 @@ public:
                  qreal angle,
                  qreal xradius,
                  qreal yradius,
-                 const QPen& pen);
+                 const QPen& pen,
+                 const QBrush& brush,
+                 bool filled);
 
     QSize size() const;
     void resize(QSize newSize);

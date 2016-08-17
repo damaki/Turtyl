@@ -353,7 +353,9 @@ void TurtleCanvasGraphicsItem::drawArc(const QPointF &centerPos,
                                    qreal angle,
                                    qreal xradius,
                                    qreal yradius,
-                                   const QPen &pen)
+                                   const QPen &pen,
+                                   const QBrush& brush,
+                                   bool filled)
 {
     {
         QMutexLocker lock(&m_mutex);
@@ -362,6 +364,7 @@ void TurtleCanvasGraphicsItem::drawArc(const QPointF &centerPos,
         painter.setRenderHint(QPainter::Antialiasing, m_antialiased);
 
         painter.setPen(pen);
+        painter.setBrush(brush);
 
         // Bounding box centered around the origin.
         // This permits rotating the drawing around the origing, based on startAngle.
@@ -389,7 +392,14 @@ void TurtleCanvasGraphicsItem::drawArc(const QPointF &centerPos,
         // also adjust for the 90 degree difference in the coordinate systems.
         painter.rotate(startAngle - 90.0);
 
-        painter.drawArc(boundingBox, 0, angleInt);
+        if (filled)
+        {
+            painter.drawPie(boundingBox, 0, angleInt);
+        }
+        else
+        {
+            painter.drawArc(boundingBox, 0, angleInt);
+        }
 
         // Map boundingBox from local coordinates to global coordinates.
         // Note that QMartrix::mapRect() returns the bounding rectangle

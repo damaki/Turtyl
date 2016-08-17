@@ -23,7 +23,7 @@
 #include <cassert>
 
 static const int DRAW_LINE_ARGS_COUNT = 10;
-static const int DRAW_ARC_ARGS_COUNT = 12;
+static const int DRAW_ARC_ARGS_COUNT = 18;
 static const int SET_BACKGROUND_COLOR_ARGS_COUNT = 3;
 
 static const char* LUA_SCRIPT_RUNNER_NAME = "_turtyl_script_runner";
@@ -170,6 +170,73 @@ static void setPenCapStyle(QPen& pen, lua_Integer capStyle)
     default:
         pen.setCapStyle(Qt::SquareCap);
 
+    }
+}
+
+static void setBrushStyle(QBrush& brush, lua_Integer brushStyle)
+{
+    switch (brushStyle)
+    {
+    case 2:
+        brush.setStyle(Qt::Dense1Pattern);
+        break;
+
+    case 3:
+        brush.setStyle(Qt::Dense2Pattern);
+        break;
+
+    case 4:
+        brush.setStyle(Qt::Dense3Pattern);
+        break;
+
+    case 5:
+        brush.setStyle(Qt::Dense4Pattern);
+        break;
+
+    case 6:
+        brush.setStyle(Qt::Dense5Pattern);
+        break;
+
+    case 7:
+        brush.setStyle(Qt::Dense6Pattern);
+        break;
+
+    case 8:
+        brush.setStyle(Qt::Dense7Pattern);
+        break;
+
+    case 9:
+        brush.setStyle(Qt::NoBrush);
+        break;
+
+    case 10:
+        brush.setStyle(Qt::HorPattern);
+        break;
+
+    case 11:
+        brush.setStyle(Qt::VerPattern);
+        break;
+
+    case 12:
+        brush.setStyle(Qt::CrossPattern);
+        break;
+
+    case 13:
+        brush.setStyle(Qt::BDiagPattern);
+        break;
+
+    case 14:
+        brush.setStyle(Qt::FDiagPattern);
+        break;
+
+    case 15:
+        brush.setStyle(Qt::DiagCrossPattern);
+        break;
+
+    case 1:
+    default:
+        brush.setStyle(Qt::SolidPattern);
+        break;
     }
 }
 
@@ -874,11 +941,14 @@ int ScriptRunner::drawArc(lua_State* state)
     lua_Number r,g,b,a;
     lua_Number size;
     lua_Integer capStyle;
+    lua_Number brush_r, brush_g, brush_b, brush_a;
+    lua_Integer brushStyle;
+    bool filled;
 
     // Check number of arguments
     if (lua_gettop(state) < DRAW_ARC_ARGS_COUNT)
     {
-        lua_pushstring(state, "too few arguments to draw_arc");
+        lua_pushstring(state, "too few arguments to _ui.drawarc");
         lua_error(state);
     }
 
@@ -894,6 +964,12 @@ int ScriptRunner::drawArc(lua_State* state)
     a           = getNumber (state, 10, "_ui.drawarc()");
     size        = getNumber (state, 11, "_ui.drawarc()");
     capStyle    = getInteger(state, 12, "_ui.drawarc()");
+    brush_r     = getNumber (state, 13, "_ui.drawarc()");
+    brush_g     = getNumber (state, 14, "_ui.drawarc()");
+    brush_b     = getNumber (state, 15, "_ui.drawarc()");
+    brush_a     = getNumber (state, 16, "_ui.drawarc()");
+    brushStyle  = getNumber (state, 17, "_ui.drawarc()");
+    filled      = getBoolean (state, 18, "_ui.drawarc()");
 
     // The bottom-left of the screen as it appears to the user is (0,0)
     // In Qt the top-left is (0,0) so the coordinates from the script are flipped
@@ -902,8 +978,18 @@ int ScriptRunner::drawArc(lua_State* state)
     QPen pen(clippedColor(r,g,b,a), size);
     setPenCapStyle(pen, capStyle);
 
+    QBrush brush(clippedColor(brush_r, brush_g, brush_b, brush_a));
+    setBrushStyle(brush, brushStyle);
+
     ScriptRunner& runner = getScriptRunner(state);
-    runner.graphicsWidget()->drawArc(arcCenterPos, startAngle, angle, xradius, yradius, pen);
+    runner.graphicsWidget()->drawArc(arcCenterPos,
+                                     startAngle,
+                                     angle,
+                                     xradius,
+                                     yradius,
+                                     pen,
+                                     brush,
+                                     filled);
     runner.pauseIfRequested();
     runner.haltIfRequested();
 

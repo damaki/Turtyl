@@ -96,6 +96,24 @@ flatcap   = 2
 roundcap  = 3
 
 -------------------------------------------------------------------------------
+-- Brush styles
+solidpattern           = 1
+dense1pattern          = 2
+dense2pattern          = 3
+dense3pattern          = 4
+dense4pattern          = 5
+dense5pattern          = 6
+dense6pattern          = 7
+dense7pattern          = 8
+nobrush                = 9
+horpattern             = 10
+verpattern             = 11
+crosspattern           = 12
+bdiagpattern           = 13
+fdiagpattern           = 14
+diagcrosspattern       = 15
+
+-------------------------------------------------------------------------------
 -- Turtle class.
 --
 -- The turtle class manages the state for a turtle:
@@ -113,6 +131,8 @@ function Turtle.new()
 
     t.position      = {x=0.0, y=0.0}
     t.pencolor      = black
+    t.fillcolor     = {r=0, g=0, b=0, a=0} -- transparent
+    t.brushstyle    = solidpattern
     t.heading       = 0.0 -- turtle heading in radians
     t.thickness     = 1
     t.pendown       = true
@@ -164,7 +184,7 @@ function Turtle:left(degrees)
     self:right(-degrees)
 end
 
-function Turtle:arc(angle, xradius, yradius)
+function Turtle:arc(angle, xradius, yradius, filled)
     if self.pendown then
         if yradius == nil then
             yradius = xradius
@@ -177,11 +197,14 @@ function Turtle:arc(angle, xradius, yradius)
                            yradius,
                            self.pencolor.r, self.pencolor.g, self.pencolor.b, self.pencolor.a,
                            self.thickness,
-                           self.pencap)
+                           self.pencap,
+                           self.fillcolor.r, self.fillcolor.g, self.fillcolor.b, self.fillcolor.a,
+                           self.brushstyle,
+                           filled)
     end
 end
 
-function Turtle:arc2(angle, xradius, yradius)
+function Turtle:arc2(angle, xradius, yradius, filled)
     if yradius == nul then
         yradius = xradius
     end
@@ -194,7 +217,10 @@ function Turtle:arc2(angle, xradius, yradius)
                            yradius,
                            self.pencolor.r, self.pencolor.g, self.pencolor.b, self.pencolor.a,
                            self.thickness,
-                           self.pencap)
+                           self.pencap,
+                           self.fillcolor.r, self.fillcolor.g, self.fillcolor.b, self.fillcolor.a,
+                           self.brushstyle,
+                           filled)
     end
 
     -- Move the turtle position to the end of the arc
@@ -230,6 +256,10 @@ function Turtle:setpencolor(r,g,b,a)
     self.pencolor = parsecolor(r,g,b,a)
 
     self:updateui();
+end
+
+function Turtle:setfillcolor(r,g,b,a)
+    self.fillcolor = parsecolor(r,g,b,a)
 end
 
 function Turtle:hide()
@@ -321,7 +351,7 @@ function arc(degrees, xradius, yradius)
     assert(yradius == nil or type(yradius) == "number",
            "3rd argument to arc() must be a number")
 
-    turtles[currturtle]:arc(degrees, xradius, yradius)
+    turtles[currturtle]:arc(degrees, xradius, yradius, false)
 end
 
 function arc2(degrees, xradius, yradius)
@@ -330,7 +360,26 @@ function arc2(degrees, xradius, yradius)
     assert(yradius == nil or type(yradius) == "number",
            "3rd argument to arc2() must be a number")
 
-    turtles[currturtle]:arc2(degrees, xradius, yradius)
+    turtles[currturtle]:arc2(degrees, xradius, yradius, false)
+end
+
+
+function arcfill(degrees, xradius, yradius)
+    assert(type(degrees) == "number", "1st argument to arcfill() must be a number")
+    assert(type(xradius) == "number", "2nd argument to arcfill() must be a number")
+    assert(yradius == nil or type(yradius) == "number",
+           "3rd argument to arcfill() must be a number")
+
+    turtles[currturtle]:arc(degrees, xradius, yradius, true)
+end
+
+function arc2fill(degrees, xradius, yradius)
+    assert(type(degrees) == "number", "1st argument to arc2fill() must be a number")
+    assert(type(xradius) == "number", "2nd argument to arc2fill() must be a number")
+    assert(yradius == nil or type(yradius) == "number",
+           "3rd argument to arc2fill() must be a number")
+
+    turtles[currturtle]:arc2(degrees, xradius, yradius, true)
 end
 
 function pu()
@@ -373,6 +422,24 @@ end
 function pencolor()
     local t = turtles[currturtle]
     return t.pencolor.r, t.pencolor.g, t.pencolor.b, t.pencolor.a
+end
+
+function setfillcolor(r,g,b,a)
+    turtles[currturtle]:setfillcolor(r,g,b,a)
+end
+
+function fillcolor()
+    local t = turtles[currturtle]
+    return t.fillcolor.r, t.fillcolor.g, t.fillcolor.b, t.fillcolor.a
+end
+
+function setfillbrush(brush)
+    assert(type(brush) == "number", "argument to setfillbrush must be an integer");
+    turtles[currturtle].brushstyle = brush
+end
+
+function fillbrush()
+    return turtles[currturtle].brushstyle
 end
 
 function setpencap(cap)

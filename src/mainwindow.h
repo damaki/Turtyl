@@ -64,6 +64,7 @@ private slots:
     void showErrors();
     void showScriptOutputs();
 
+    void clearCanvas();
     void saveCanvas();
 
     void saveScript();

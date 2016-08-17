@@ -46,8 +46,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Add the graphics view actions
     QAction* centerAction = new QAction("&Center View", NULL);
-    connect(centerAction, SIGNAL(triggered()), this, SLOT(centerGraphicsScene()));
+    QAction* clearAction  = new QAction("C&lear Canvas", NULL);
     ui->graphicsView->addAction(centerAction);
+    ui->graphicsView->addAction(clearAction);
+    connect(centerAction, SIGNAL(triggered()), this, SLOT(centerGraphicsScene()));
+    connect(clearAction,  SIGNAL(triggered()), this, SLOT(clearCanvas()));
 
     ui->graphicsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -263,6 +266,11 @@ void MainWindow::showScriptOutputs()
 {
     ui->messagesDockWidget->show();
     ui->messagesTabWidget->setCurrentWidget(ui->outputTab);
+}
+
+void MainWindow::clearCanvas()
+{
+    m_turtleGraphics->clear();
 }
 
 /**
