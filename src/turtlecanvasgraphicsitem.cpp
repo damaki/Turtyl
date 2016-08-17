@@ -363,9 +363,6 @@ void TurtleCanvasGraphicsItem::drawArc(const QPointF &centerPos,
         QPainter painter(&m_pixmap);
         painter.setRenderHint(QPainter::Antialiasing, m_antialiased);
 
-        painter.setPen(pen);
-        painter.setBrush(brush);
-
         // Bounding box centered around the origin.
         // This permits rotating the drawing around the origing, based on startAngle.
         QRectF boundingBox(-xradius,
@@ -394,12 +391,13 @@ void TurtleCanvasGraphicsItem::drawArc(const QPointF &centerPos,
 
         if (filled)
         {
+            painter.setPen(QPen(Qt::NoPen));
+            painter.setBrush(brush);
             painter.drawPie(boundingBox, 0, angleInt);
         }
-        else
-        {
-            painter.drawArc(boundingBox, 0, angleInt);
-        }
+
+        painter.setPen(pen);
+        painter.drawArc(boundingBox, 0, angleInt);
 
         // Map boundingBox from local coordinates to global coordinates.
         // Note that QMartrix::mapRect() returns the bounding rectangle
