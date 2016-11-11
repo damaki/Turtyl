@@ -3,6 +3,7 @@
 Turtyl is a turtle graphics program based on the [Lua](http://www.lua.org)
 scripting language.
 
+![Image of Turtyl](turtyl-screenshot.png)
 
 # Commands
 
