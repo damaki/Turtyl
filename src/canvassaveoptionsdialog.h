@@ -31,7 +31,7 @@ class CanvasSaveOptionsDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit CanvasSaveOptionsDialog(QWidget *parent = 0);
+    explicit CanvasSaveOptionsDialog(QWidget *parent = nullptr);
     ~CanvasSaveOptionsDialog();
 
     bool fitToUsedArea() const;

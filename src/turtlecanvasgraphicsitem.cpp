@@ -408,7 +408,7 @@ void TurtleCanvasGraphicsItem::drawArc(const QPointF &centerPos,
         // Note that QMartrix::mapRect() returns the bounding rectangle
         // of the mapped rectangle (if rotations are applied), which is
         // exactly what we want.
-        QMatrix worldMatrix = painter.worldMatrix();
+        QTransform worldMatrix = painter.worldTransform();
         boundingBox = worldMatrix.mapRect(boundingBox);
 
         // Take the pen's width into account, otherwise the used rect

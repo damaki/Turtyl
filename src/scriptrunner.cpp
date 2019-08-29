@@ -45,7 +45,7 @@ static ScriptRunner& getScriptRunner(lua_State* state)
 {
     lua_getglobal(state, LUA_SCRIPT_RUNNER_NAME);
     void* rawparent = lua_touserdata(state, -1);
-    if (rawparent == NULL)
+    if (rawparent == nullptr)
     {
         lua_pushstring(state, "Could not load ScriptRunner");
         lua_error(state);
@@ -107,7 +107,7 @@ static lua_Integer getInteger(lua_State* state, int stackPos, const char* funcNa
                         .toStdString().c_str());
         lua_error(state);
     }
-    return integer;
+    return static_cast<lua_Integer>(integer);
 }
 
 static bool getBoolean(lua_State* state, int stackPos, const char* funcName)
@@ -464,7 +464,7 @@ void ScriptRunner::runScriptFile(const QString& filename)
     else
     {
         const char* errmsg = lua_tostring(m_state, -1);
-        if (NULL != errmsg)
+        if (nullptr != errmsg)
         {
             emit scriptError(QString(errmsg));
         }
@@ -524,7 +524,7 @@ void ScriptRunner::doSleep(int msecs)
         QMutexLocker lock(&m_sleepMutex);
         if (m_sleepAllowed)
         {
-            (void)m_sleepCond.wait(&m_sleepMutex, msecs);
+            (void)m_sleepCond.wait(&m_sleepMutex, static_cast<unsigned long>(msecs));
         }
     }
 }
@@ -682,7 +682,7 @@ void ScriptRunner::run()
             else
             {
                 const char* errmsg = lua_tostring(m_state, -1);
-                if (NULL != errmsg)
+                if (nullptr != errmsg)
                 {
                     emit scriptError(QString(errmsg));
                 }
@@ -791,24 +791,24 @@ void ScriptRunner::setupCommands()
 {
     static const luaL_Reg uiTableFuncs[] =
     {
-        "print", &ScriptRunner::printMessage,
-        NULL,    NULL
+        {"print", &ScriptRunner::printMessage},
+        {nullptr, nullptr}
     };
 
     static const luaL_Reg canvasTableFuncs[] =
     {
-        "drawline",           &ScriptRunner::drawLine,
-        "drawarc",            &ScriptRunner::drawArc,
-        "clear",              &ScriptRunner::clearScreen,
-        "setbackgroundcolor", &ScriptRunner::setBackgroundColor,
-        "getbackgroundcolor", &ScriptRunner::getBackgroundColor,
-        "setturtle",          &ScriptRunner::setTurtle,
-        "getturtle",          &ScriptRunner::getTurtle,
-        "showturtle",         &ScriptRunner::showTurtle,
-        "hideturtle",         &ScriptRunner::hideTurtle,
-        "turtlehidden",       &ScriptRunner::turtleHidden,
-        "setaa",              &ScriptRunner::setAntialiasing,
-        NULL,                 NULL
+        {"drawline",           &ScriptRunner::drawLine},
+        {"drawarc",            &ScriptRunner::drawArc},
+        {"clear",              &ScriptRunner::clearScreen},
+        {"setbackgroundcolor", &ScriptRunner::setBackgroundColor},
+        {"getbackgroundcolor", &ScriptRunner::getBackgroundColor},
+        {"setturtle",          &ScriptRunner::setTurtle},
+        {"getturtle",          &ScriptRunner::getTurtle},
+        {"showturtle",         &ScriptRunner::showTurtle},
+        {"hideturtle",         &ScriptRunner::hideTurtle},
+        {"turtlehidden",       &ScriptRunner::turtleHidden},
+        {"setaa",              &ScriptRunner::setAntialiasing},
+        {nullptr,              nullptr}
     };
 
     lua_settop(m_state, 0); // ensure empty stack
@@ -968,12 +968,12 @@ int ScriptRunner::drawArc(lua_State* state)
     brush_g     = getNumber (state, 14, "_ui.drawarc()");
     brush_b     = getNumber (state, 15, "_ui.drawarc()");
     brush_a     = getNumber (state, 16, "_ui.drawarc()");
-    brushStyle  = getNumber (state, 17, "_ui.drawarc()");
+    brushStyle  = getInteger (state, 17, "_ui.drawarc()");
     filled      = getBoolean (state, 18, "_ui.drawarc()");
 
     // The bottom-left of the screen as it appears to the user is (0,0)
     // In Qt the top-left is (0,0) so the coordinates from the script are flipped
-    QPoint arcCenterPos(centerx, -centery);
+    QPointF arcCenterPos(centerx, -centery);
 
     QPen pen(clippedColor(r,g,b,a), size);
     setPenCapStyle(pen, capStyle);
@@ -1182,7 +1182,7 @@ int ScriptRunner::sleep(lua_State* state)
     unsigned long msecs = static_cast<unsigned long>(delay);
 
     ScriptRunner& runner = getScriptRunner(state);
-    runner.doSleep(msecs);
+    runner.doSleep(static_cast<int>(msecs));
     runner.pauseIfRequested();
     runner.haltIfRequested();
 
@@ -1194,7 +1194,7 @@ int ScriptRunner::setAntialiasing(lua_State* state)
     bool value = getBoolean(state, 1, "setaa");
 
     ScriptRunner& runner = getScriptRunner(state);
-    if (NULL != runner.m_graphicsWidget)
+    if (nullptr != runner.m_graphicsWidget)
     {
         runner.m_graphicsWidget->setAntialiased(value);
     }

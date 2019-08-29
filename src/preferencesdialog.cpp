@@ -95,7 +95,7 @@ QList<QString> PreferencesDialog::startupScripts() const
     for (int i = 0; i < size; i++)
     {
         QListWidgetItem* item = ui->startupScriptListWidget->item(i);
-        if (item != NULL)
+        if (item != nullptr)
         {
             scripts.append(item->text());
         }
@@ -125,7 +125,7 @@ QList<QString> PreferencesDialog::requirePaths() const
     for (int i = 0; i < size; i++)
     {
         QListWidgetItem* item = ui->requirePathsListWidget->item(i);
-        if (item != NULL)
+        if (item != nullptr)
         {
             paths.append(item->text());
         }
