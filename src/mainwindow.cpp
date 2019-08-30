@@ -45,8 +45,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->centerOn(0.0, 0.0);
 
     // Add the graphics view actions
-    QAction* centerAction = new QAction("&Center View", NULL);
-    QAction* clearAction  = new QAction("C&lear Canvas", NULL);
+    QAction* centerAction = new QAction("&Center View", nullptr);
+    QAction* clearAction  = new QAction("C&lear Canvas", nullptr);
     ui->graphicsView->addAction(centerAction);
     ui->graphicsView->addAction(clearAction);
     connect(centerAction, SIGNAL(triggered()), this, SLOT(centerGraphicsScene()));
@@ -141,6 +141,7 @@ void MainWindow::runScript()
     ui->action_Run->setEnabled(false);
     ui->action_Halt->setEnabled(true);
     ui->action_Pause->setEnabled(true);
+    ui->action_Save_Canvas->setEnabled(false);
 }
 
 void MainWindow::showScriptError(const QString& message)
@@ -180,6 +181,7 @@ void MainWindow::scriptFinished(bool hasErrors)
     ui->action_Run->setEnabled(true);
     ui->action_Halt->setEnabled(false);
     ui->action_Pause->setEnabled(false);
+    ui->action_Save_Canvas->setEnabled(true);
 
     if (!hasErrors)
     {
@@ -197,6 +199,7 @@ void MainWindow::pauseScript()
 
     ui->action_Pause->setEnabled(false);
     ui->action_Run->setEnabled(true);
+    ui->action_Save_Canvas->setEnabled(true);
 
     m_cmds.pauseScript();
 }
@@ -211,6 +214,7 @@ void MainWindow::resumeScript()
 
     ui->action_Pause->setEnabled(true);
     ui->action_Run->setEnabled(false);
+    ui->action_Save_Canvas->setEnabled(false);
 
     m_cmds.resumeScript();
 }
